@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Зоряний клас</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0e1230">
+  <link rel="stylesheet" href="styles/base.css">
+  <script src="vendor/qrcode.min.js"></script>
+</head>
+<body>
+  <div id="app">
+    <div style="min-height: 85vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 24px;">
+      <div style="font-size: 56px; color: #ffc53d; margin-bottom: 12px;">✦</div>
+      <h1 style="font-size: 24px; margin: 0 0 8px 0; color: #f2f4ff;">Зоряний клас</h1>
+      <p style="color: #a9b0e0; font-size: 15px; margin: 0;">Завантаження застосунку...</p>
+    </div>
+  </div>
+  <script>
+    window.addEventListener('error', function(e) {
+      var app = document.getElementById('app');
+      if (app && app.innerHTML.includes('Завантаження застосунку')) {
+        app.innerHTML = '<div style="min-height: 85vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 24px; color: #f2f4ff;"><div style="font-size: 48px; color: #ff6b6b; margin-bottom: 12px;">⚠️</div><h2 style="margin: 0 0 8px 0;">Помилка завантаження</h2><p style="color: #ff6b6b; max-width: 320px; font-size: 14px; margin-bottom: 20px;">' + (e.message || 'Не вдалося завантажити модулі') + '</p><button id="btn-force-reload" style="background: #8b7bff; color: white; border: none; padding: 12px 24px; border-radius: 12px; font-weight: bold; cursor: pointer;">Очистити кеш та оновити</button></div>';
+        var btn = document.getElementById('btn-force-reload');
+        if (btn) {
+          btn.onclick = function() {
+            btn.textContent = 'Очищення...';
+            btn.disabled = true;
+            if ('serviceWorker' in navigator) {
+              navigator.serviceWorker.getRegistrations().then(function(regs) {
+                for (var i = 0; i < regs.length; i++) regs[i].unregister();
+              });
+            }
+            if ('caches' in window) {
+              caches.keys().then(function(keys) {
+                for (var i = 0; i < keys.length; i++) caches.delete(keys[i]);
+              });
+            }
+            setTimeout(function() {
+              window.location.reload(true);
+            }, 300);
+          };
+        }
+      }
+    });
+  </script>
+  <script type="module" src="src/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,65 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{db}/documents {
+
+    function isTeacher() {
+      return request.auth != null &&
+             exists(/databases/$(db)/documents/admins/$(request.auth.uid));
+    }
+    function isUuid(id) {
+      return id.matches('^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$');
+    }
+    function validProfile(d) {
+      return d.keys().hasOnly(['alias','archived','balance','earned','recent','hot','last',
+                               'lastOp','lastAt','stats','counters','achievements','v'])
+          && d.alias is string && d.alias.size() > 0 && d.alias.size() <= 24
+          && d.balance is int && d.balance >= 0
+          && d.earned  is int && d.earned  >= 0
+          && d.v is int;
+    }
+    function validOp(d) {
+      return d.type in ['credit','redeem','quest','adjust','void']
+          && d.delta is int
+          && d.ts == request.time
+          && d.prev is map;
+    }
+
+    // Конфігурація: публічне читання опублікованого, решта лише вчитель
+    match /config/published { allow read: if true; allow write: if isTeacher(); }
+    match /config/stock     { allow read: if true; allow write: if isTeacher(); }
+    match /config/{other}   { allow read, write: if isTeacher(); }
+    match /config_history/{v} { allow read, write: if isTeacher(); }
+
+    // Аудит: лише додавання
+    match /audit/{id} { allow read, create: if isTeacher(); allow update, delete: if false; }
+
+    // Адміністратори: створюються вручну в консолі
+    match /admins/{uid} {
+      allow read: if request.auth != null && request.auth.uid == uid;
+      allow write: if false;
+    }
+
+    match /profiles/{pid} {
+      allow get: if isUuid(pid);                    // за точним UUID
+      allow list: if isTeacher();                   // перелік заборонено всім, крім вчителя
+      allow create: if isTeacher() && isUuid(pid)
+                    && validProfile(request.resource.data) && request.resource.data.v == 1;
+      allow update: if (isTeacher() && validProfile(request.resource.data) && request.resource.data.v == resource.data.v + 1)
+                    || (
+                         isUuid(pid)
+                         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['alias'])
+                         && request.resource.data.alias is string
+                         && request.resource.data.alias.size() > 0
+                         && request.resource.data.alias.size() <= 24
+                       );
+      allow delete: if isTeacher();
+
+      match /ledger/{opId} {
+        // читання лише поки профіль існує: після видалення/перевипуску старе посилання нічого не показує
+        allow read: if isUuid(pid) && exists(/databases/$(db)/documents/profiles/$(pid));
+        allow create: if isTeacher() && validOp(request.resource.data);
+        allow update, delete: if false;             // журнал незмінний
+      }
+    }
+  }
+}
