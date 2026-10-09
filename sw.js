@@ -1,4 +1,4 @@
-const CACHE_NAME = 'zoryanyi-klas-v6';
+const CACHE_NAME = 'zoryanyi-klas-v7';
 const ASSETS = [
   './',
   './index.html',
@@ -36,6 +36,7 @@ const ASSETS = [
   './src/student/shop.js',
   './src/student/quests.js',
   './src/student/history.js',
+  './src/student/stats.js',
   './src/ui/app.js',
   './src/ui/auth.js',
   './src/ui/scanner.js',

@@ -30,10 +30,10 @@ export async function renderAdmin(root) {
       <div class="surface-card flex flex-col gap-md" style="margin-bottom: var(--spacing-md); border: 1.5px solid var(--gold-border);">
         <div class="flex justify-between items-center" style="flex-wrap: wrap; gap: 8px;">
           <h3 class="fantasy-title" style="margin:0; font-size: 17px; color: var(--gold-light);">🎁 Магазин нагород</h3>
-          <button id="btn-save-shop" class="btn-genshin-gold" style="padding: 8px 16px; font-size: 13px; font-weight: bold; min-height: 38px; border-radius: 12px;">💾 Зберегти ціни</button>
+          <button id="btn-save-shop" class="btn-genshin-gold" style="padding: 8px 16px; font-size: 13px; font-weight: bold; min-height: 38px; border-radius: 12px;">💾 Зберегти зміни</button>
         </div>
         <p class="text-muted" style="margin:0; font-size: 13px;">
-          Тут можна змінювати ціни, приховувати тимчасово недоступні нагороди або додавати нові.
+          Тут можна змінювати ціни, залишки на складі, приховувати тимчасово недоступні нагороди або додавати нові.
         </p>
 
         <!-- Список наявних нагород -->
@@ -57,6 +57,16 @@ export async function renderAdmin(root) {
                 <option value="privilege">Привілей</option>
               </select>
               <button type="submit" class="btn-genshin-gold" style="flex: 1; min-width: 90px; min-height: 44px; padding: 8px 16px; white-space: nowrap; font-weight: bold; border-radius: 12px;">Додати</button>
+            </div>
+            <div class="flex gap-md items-center" style="flex-wrap: wrap; margin-top: 4px;">
+              <label class="flex items-center gap-xs" style="cursor: pointer; font-size: 13px; color: var(--gold-light); user-select: none;">
+                <input type="checkbox" id="reward-has-stock" style="cursor: pointer; width: 16px; height: 16px;">
+                <span>Обмежена кількість</span>
+              </label>
+              <div id="reward-stock-wrap" style="display: none; align-items: center; gap: 6px;">
+                <input type="number" id="reward-stock" placeholder="Залишок" min="0" max="9999" value="10" style="width: 75px; min-height: 36px; text-align: center; font-weight: bold; font-size: 14px; padding: 4px; border-radius: var(--radius-sm); background: #fff; color: #222; border: 1.5px solid var(--gold-deep);">
+                <span style="font-size: 12px; color: var(--muted);">шт.</span>
+              </div>
             </div>
           </form>
         </div>
@@ -101,6 +111,7 @@ export async function renderAdmin(root) {
 
     listEl.innerHTML = shopItems.map((item, index) => {
       const isActive = item.active !== false;
+      const hasStock = typeof item.stock === 'number';
       return `
         <div class="parchment-card flex justify-between items-center" style="flex-wrap: wrap; gap: 10px; padding: 10px 14px; opacity: ${isActive ? '1' : '0.6'};">
           <div class="flex items-center gap-sm" style="min-width: 160px; flex: 1;">
@@ -109,14 +120,28 @@ export async function renderAdmin(root) {
               <div style="font-weight: 700; font-size: 15px; color: var(--text-parchment);">${item.name}</div>
               <div style="font-size: 11px; margin-top: 2px; color: var(--text-parchment-muted);">
                 ${item.category === 'sweet' ? 'Смаколик' : 'Привілей'} · ${isActive ? '<span style="color:#217346; font-weight: 700;">Активний</span>' : '<span style="color:#8b2626;">Приховано</span>'}
+                ${hasStock ? ` · <span style="font-weight: 700; color: ${item.stock === 0 ? '#b71c1c' : '#217346'};">Залишок: ${item.stock} шт.</span>` : ''}
               </div>
             </div>
           </div>
 
-          <div class="flex items-center gap-xs" style="flex-wrap: nowrap;">
-            <div class="flex items-center gap-xs">
-              <input type="number" class="item-price-input" data-index="${index}" value="${item.price}" min="1" max="999" style="width: 58px; min-height: 38px; padding: 4px; text-align: center; font-weight: bold; font-size: 15px; background: #fff; color: #222; border: 1.5px solid var(--gold-deep);">
+          <div class="flex items-center gap-xs" style="flex-wrap: wrap;">
+            <!-- Ціна товару -->
+            <div class="flex items-center gap-xs" title="Ціна товару">
+              <input type="number" class="item-price-input" data-index="${index}" value="${item.price}" min="1" max="999" style="width: 58px; min-height: 38px; padding: 4px; text-align: center; font-weight: bold; font-size: 15px; background: #fff; color: #222; border: 1.5px solid var(--gold-deep); border-radius: var(--radius-sm);">
               <span style="color: var(--gold-deep); font-weight: bold; font-size: 15px; font-family: var(--font-fantasy);">✦</span>
+            </div>
+
+            <!-- Обмеження кількості (stock) -->
+            <div class="flex items-center gap-xs" style="background: rgba(0,0,0,0.06); padding: 3px 8px; border-radius: var(--radius-sm); border: 1px solid rgba(0,0,0,0.1);">
+              <label class="flex items-center gap-xs" style="cursor: pointer; font-size: 12px; font-weight: 600; color: var(--text-parchment); user-select: none;">
+                <input type="checkbox" class="item-stock-toggle" data-index="${index}" ${hasStock ? 'checked' : ''} style="cursor: pointer;">
+                <span>Обмежено</span>
+              </label>
+              <div style="display: ${hasStock ? 'inline-flex' : 'none'}; align-items: center; gap: 2px;">
+                <input type="number" class="item-stock-input" data-index="${index}" value="${hasStock ? item.stock : 10}" min="0" max="9999" style="width: 52px; min-height: 32px; padding: 2px 4px; text-align: center; font-weight: bold; font-size: 13px; background: #fff; color: #222; border: 1px solid var(--gold-deep); border-radius: var(--radius-sm);" title="Залишок на складі">
+                <span style="font-size: 11px; color: var(--text-parchment-muted);">шт.</span>
+              </div>
             </div>
             
             <button class="btn-toggle-active" data-index="${index}" style="padding: 6px 10px; min-height: 38px; font-size: 12px; font-weight: 600; border-radius: var(--radius-sm); background: ${isActive ? 'rgba(61, 220, 151, 0.2)' : 'rgba(0,0,0,0.08)'}; color: ${isActive ? '#137a4a' : 'var(--text-parchment-muted)'}; border: 1px solid rgba(0,0,0,0.1);" title="${isActive ? 'Приховати з магазину' : 'Показати в магазині'}">
@@ -138,6 +163,33 @@ export async function renderAdmin(root) {
         const val = Number(e.target.value);
         if (val > 0) {
           shopItems[idx].price = val;
+        }
+      });
+    });
+
+    // Перемикання чекбокса обмеження кількості
+    listEl.querySelectorAll('.item-stock-toggle').forEach(checkbox => {
+      checkbox.addEventListener('change', (e) => {
+        const idx = Number(e.target.dataset.index);
+        if (e.target.checked) {
+          const container = e.target.closest('div');
+          const stockInput = container ? container.querySelector('.item-stock-input') : null;
+          const val = stockInput ? parseInt(stockInput.value, 10) : 10;
+          shopItems[idx].stock = isNaN(val) ? 10 : Math.max(0, val);
+        } else {
+          delete shopItems[idx].stock;
+        }
+        renderAdminShop();
+      });
+    });
+
+    // Зміна значення залишку в інпуті
+    listEl.querySelectorAll('.item-stock-input').forEach(input => {
+      input.addEventListener('change', (e) => {
+        const idx = Number(e.target.dataset.index);
+        const val = parseInt(e.target.value, 10);
+        if (!isNaN(val)) {
+          shopItems[idx].stock = Math.max(0, val);
         }
       });
     });
@@ -166,6 +218,15 @@ export async function renderAdmin(root) {
 
   renderAdminShop();
 
+  // Додавання нової нагороди: перемикання видимості інпуту залишку
+  const chkNewStock = document.getElementById('reward-has-stock');
+  const wrapNewStock = document.getElementById('reward-stock-wrap');
+  if (chkNewStock && wrapNewStock) {
+    chkNewStock.addEventListener('change', (e) => {
+      wrapNewStock.style.display = e.target.checked ? 'inline-flex' : 'none';
+    });
+  }
+
   // Додавання нової нагороди
   document.getElementById('form-add-reward').addEventListener('submit', (e) => {
     e.preventDefault();
@@ -173,11 +234,13 @@ export async function renderAdmin(root) {
     const name = document.getElementById('reward-name').value.trim();
     const price = Number(document.getElementById('reward-price').value) || 10;
     const category = document.getElementById('reward-cat').value;
+    const hasStock = document.getElementById('reward-has-stock')?.checked;
+    const stockVal = hasStock ? Math.max(0, parseInt(document.getElementById('reward-stock').value, 10) || 0) : null;
 
     if (!name) return;
 
     const id = 'item_' + Date.now().toString(36);
-    shopItems.push({
+    const newItem = {
       id,
       name,
       icon,
@@ -185,11 +248,19 @@ export async function renderAdmin(root) {
       category,
       active: true,
       order: shopItems.length + 1
-    });
+    };
+    if (hasStock) {
+      newItem.stock = stockVal;
+    }
+    shopItems.push(newItem);
 
     document.getElementById('reward-name').value = '';
+    if (chkNewStock) {
+      chkNewStock.checked = false;
+      wrapNewStock.style.display = 'none';
+    }
     renderAdminShop();
-    showToast(`Нагороду "${name}" додано до списку! Не забудьте натиснути «Зберегти ціни».`);
+    showToast(`Нагороду "${name}" додано до списку! Не забудьте натиснути «Зберегти зміни».`);
   });
 
   // Збереження списку товарів у Firestore

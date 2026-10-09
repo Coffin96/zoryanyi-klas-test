@@ -320,7 +320,9 @@ function renderShop() {
   shopList.innerHTML = '';
   
   shop.forEach(item => {
-    const canAfford = profile.balance >= item.price;
+    const hasStock = typeof item.stock === 'number';
+    const isSoldOut = hasStock && item.stock <= 0;
+    const canAfford = profile.balance >= item.price && !isSoldOut;
     const btn = document.createElement('button');
     btn.className = `parchment-card ${canAfford ? '' : 'disabled'}`;
     btn.style.width = '100%';
@@ -331,10 +333,22 @@ function renderShop() {
     btn.style.justifyContent = 'space-between';
     btn.style.alignItems = 'center';
     btn.style.padding = '10px 14px';
+
+    let statusText = '';
+    if (isSoldOut) {
+      statusText = 'Розпродано';
+    } else if (canAfford) {
+      statusText = '✓' + (hasStock ? ` (${item.stock} шт.)` : '');
+    } else {
+      statusText = `(бракує ${item.price - profile.balance} ✦)`;
+    }
+
     btn.innerHTML = `
-      <span style="font-size: 15px; font-weight: 700; color: var(--text-parchment);">${item.icon} ${item.name}</span>
-      <span style="font-weight: 800; font-family: var(--font-fantasy); color: ${canAfford ? 'var(--gold-deep)' : 'var(--text-parchment-muted)'}; font-size: 14px;">
-        ${item.price} ✦ ${canAfford ? '✓' : '(бракує ' + (item.price - profile.balance) + ')'}
+      <span style="font-size: 15px; font-weight: 700; color: var(--text-parchment);">
+        ${item.icon} ${item.name} ${hasStock ? `<small style="font-size:11px; opacity:0.8; font-weight:normal;">[залишок: ${item.stock}]</small>` : ''}
+      </span>
+      <span style="font-weight: 800; font-family: var(--font-fantasy); color: ${isSoldOut ? '#b71c1c' : (canAfford ? 'var(--gold-deep)' : 'var(--text-parchment-muted)')}; font-size: 14px;">
+        ${item.price} ✦ ${statusText}
       </span>
     `;
     
@@ -372,6 +386,11 @@ function renderQuests() {
 }
 
 async function handleRedeem(itemObj, qty = 1) {
+  const hasStock = typeof itemObj.stock === 'number';
+  if (hasStock && (itemObj.stock <= 0 || itemObj.stock < qty)) {
+    alert("Розпродано");
+    return;
+  }
   const totalCost = itemObj.price * qty;
   if (!confirm(`Списати ${totalCost} ✦ за "${itemObj.name}"${qty > 1 ? ` (${qty} шт.)` : ''}?`)) return;
   const opId = crypto.randomUUID();
@@ -432,7 +451,9 @@ function renderOrderBanner() {
   }
 
   const totalCost = orderItem.price * qty;
-  const canAfford = profile.balance >= totalCost;
+  const hasStock = typeof orderItem.stock === 'number';
+  const isSoldOut = hasStock && (orderItem.stock <= 0 || orderItem.stock < qty);
+  const canAfford = profile.balance >= totalCost && !isSoldOut;
 
   container.innerHTML = `
     <div class="surface-card flex justify-between items-center" style="margin-bottom: var(--spacing-md); border: 2px solid var(--gold-primary); background: rgba(14, 38, 56, 0.95); padding: 14px;">
@@ -442,15 +463,16 @@ function renderOrderBanner() {
         </div>
         <div style="font-size: 17px; font-weight: bold; margin-top: 2px;">
           ${orderItem.icon || '🎁'} ${orderItem.name} ${qty > 1 ? `(${qty} шт.)` : ''}
+          ${hasStock ? `<span style="font-size: 12px; margin-left: 6px; font-weight: normal; color: ${isSoldOut ? '#ffa3a3' : 'var(--gold-light)'};">[залишок: ${orderItem.stock} шт.]</span>` : ''}
         </div>
         <div style="font-size: 13px; color: var(--muted); margin-top: 2px;">
           Вартість: <strong style="color: var(--star);">${totalCost} ✦</strong> 
-          ${canAfford ? `<span style="color: var(--cyan-accent);">(вистачає)</span>` : `<span style="color: #ffa3a3;">(бракує ${totalCost - profile.balance} ✦)</span>`}
+          ${isSoldOut ? `<span style="color: #ffa3a3; font-weight: bold;">(Розпродано!)</span>` : canAfford ? `<span style="color: var(--cyan-accent);">(вистачає)</span>` : `<span style="color: #ffa3a3;">(бракує ${totalCost - profile.balance} ✦)</span>`}
         </div>
       </div>
       <div class="flex gap-xs items-center">
         <button id="btn-fulfill-order" class="btn-genshin-gold" style="padding: 8px 14px; font-size: 13px; font-weight: bold; min-height: 38px; border-radius: 12px;" ${canAfford ? '' : 'disabled'}>
-          Видати ✓
+          ${isSoldOut ? 'Розпродано' : 'Видати ✓'}
         </button>
         <button id="btn-dismiss-order" style="padding: 6px 10px; min-height: 38px; background: transparent; border: 1px solid rgba(255,255,255,0.2); font-size: 14px; border-radius: 10px; color: var(--muted);" title="Закрити замовлення">
           ✕

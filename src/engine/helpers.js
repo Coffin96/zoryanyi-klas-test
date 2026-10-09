@@ -14,6 +14,11 @@ export function progressTo(profile, item, cfg, nowMs) {
   let canBuy = missing === 0;
   let reason = canBuy ? null : 'insufficient';
   
+  if (canBuy && typeof item.stock === 'number' && item.stock <= 0) {
+    canBuy = false;
+    reason = 'out-of-stock';
+  }
+
   const lim = item.limits ?? {};
   if (canBuy && lim.cooldownDays) {
     const last = profile.lastAt?.[item.id];
@@ -26,10 +31,13 @@ export function progressTo(profile, item, cfg, nowMs) {
   return { need, have, missing, canBuy, reason };
 }
 
-export function affordable(profile, cfg, nowMs, stock) {
+export function affordable(profile, cfg, nowMs, stock = {}) {
   return cfg.shop.filter(item => item.active).map(item => {
     const p = progressTo(profile, item, cfg, nowMs);
-    let st = stock[item.id];
+    let st = stock ? stock[item.id] : undefined;
+    if (st == null && typeof item.stock === 'number') {
+      st = item.stock;
+    }
     if (st != null && st <= 0) {
       p.canBuy = false;
       p.reason = 'out-of-stock';

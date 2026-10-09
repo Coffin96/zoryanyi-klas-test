@@ -400,3 +400,163 @@ body::before {
   width: 100%;
   position: relative;
 }
+
+/* 9. Student Statistics & Progression Chart */
+.stats-chart-card {
+  background: rgba(18, 25, 52, 0.92);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1.5px solid var(--gold-border);
+  border-radius: var(--radius-lg);
+  padding: 14px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.45), inset 0 0 16px rgba(229, 195, 120, 0.06);
+  margin-bottom: var(--spacing-md);
+  position: relative;
+  overflow: hidden;
+}
+
+.stats-chart-card::before,
+.stats-chart-card::after {
+  content: "";
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background: var(--gold-primary);
+  transform: rotate(45deg);
+  opacity: 0.75;
+}
+.stats-chart-card::before { top: 7px; left: 7px; }
+.stats-chart-card::after { top: 7px; right: 7px; }
+
+.stats-chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  padding: 0 2px;
+}
+
+.stats-chart-legend {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  font-size: 11px;
+}
+
+.stats-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--muted);
+}
+
+.stats-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing-xs);
+  margin-bottom: var(--spacing-sm);
+}
+
+@media (min-width: 440px) {
+  .stats-kpi-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.stats-kpi-card {
+  background: rgba(11, 16, 36, 0.85);
+  border: 1px solid rgba(214, 181, 115, 0.22);
+  border-radius: var(--radius-md);
+  padding: 8px 6px;
+  text-align: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.stats-kpi-val {
+  font-family: var(--font-fantasy);
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1.1;
+  color: var(--gold-light);
+  text-shadow: 0 0 8px var(--gold-glow);
+}
+
+.stats-kpi-label {
+  font-size: 10px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-top: 2px;
+}
+
+.stats-svg-container {
+  overflow: hidden;
+  position: relative;
+}
+
+.genshin-stats-svg {
+  display: block;
+  user-select: none;
+}
+
+.zk-chart-point {
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.zk-chart-point:hover polygon,
+.zk-chart-point:focus polygon {
+  filter: drop-shadow(0 0 6px var(--gold-glow));
+  transform: scale(1.2);
+  transform-origin: center;
+}
+
+/* Grade Distribution Bars */
+.stats-distribution-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.stats-dist-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+}
+
+.stats-dist-badge {
+  font-family: var(--font-fantasy);
+  font-weight: 800;
+  width: 22px;
+  text-align: right;
+  font-size: 13px;
+  color: var(--gold-primary);
+}
+
+.stats-dist-track {
+  flex: 1;
+  height: 8px;
+  background: rgba(10, 14, 30, 0.7);
+  border-radius: 4px;
+  border: 1px solid rgba(214, 181, 115, 0.2);
+  overflow: hidden;
+}
+
+.stats-dist-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.35s ease;
+}
+
+.stats-dist-count {
+  width: 58px;
+  text-align: right;
+  color: var(--muted);
+  font-size: 11px;
+  white-space: nowrap;
+}

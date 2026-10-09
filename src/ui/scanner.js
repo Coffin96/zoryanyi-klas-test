@@ -109,11 +109,11 @@ async function handleScan(data) {
     const nowMs = Date.now();
     const qrData = parseQR(data, nowMs); // throws Error on invalid
     
-    if (qrData.type === 'P') {
+    if (qrData.type === 'P' || qrData.type === 'card') {
       const profile = await getProfile(qrData.uuid);
       stopScanner();
       navigate('student-panel', { student: { uuid: profile.id, alias: profile.alias } });
-    } else if (qrData.type === 'R') {
+    } else if (qrData.type === 'R' || qrData.type === 'order') {
       const { ymd } = kyivParts(nowMs);
       if (qrData.ymd !== ymd) {
         throw new Error("expired-order");

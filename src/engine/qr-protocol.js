@@ -17,25 +17,25 @@ export function decode(text) {
   
   // Direct UUID match
   if (UUID.test(t)) {
-    return { type: 'P', uuid: t.toLowerCase() };
+    return { type: 'card', uuid: t.toLowerCase() };
   }
 
   // Card URL with hash or param
   const urlMatch = t.match(URL_CARD);
   if (urlMatch && UUID.test(urlMatch[2])) {
-    return { type: 'P', uuid: urlMatch[2].toLowerCase() };
+    return { type: 'card', uuid: urlMatch[2].toLowerCase() };
   }
 
   // Any URL containing a valid UUID
   const anyUuidMatch = t.match(/([0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})/i);
   if (t.includes('http') && anyUuidMatch) {
-    return { type: 'P', uuid: anyUuidMatch[1].toLowerCase() };
+    return { type: 'card', uuid: anyUuidMatch[1].toLowerCase() };
   }
 
   // Legacy zk:student:<uuid>
   if (t.startsWith('zk:student:')) {
     const rawUuid = t.replace('zk:student:', '');
-    if (UUID.test(rawUuid)) return { type: 'P', uuid: rawUuid.toLowerCase() };
+    if (UUID.test(rawUuid)) return { type: 'card', uuid: rawUuid.toLowerCase() };
   }
 
   const parts = t.split('|');
@@ -45,7 +45,7 @@ export function decode(text) {
   }
 
   if (kind === 'P') {
-    return { type: 'P', uuid };
+    return { type: 'card', uuid };
   }
 
   if (kind === 'R') {
@@ -54,7 +54,7 @@ export function decode(text) {
     if (!/^[a-z0-9_]{2,24}$/.test(item ?? '') || !Number.isInteger(q) || q < 1 || q > 10 || !/^\d{6}$/.test(ymd ?? '')) {
       throw new Error('bad-qr');
     }
-    return { type: 'R', uuid, id, item, qty: q, ymd };
+    return { type: 'order', uuid, id, item, qty: q, ymd };
   }
 
   throw new Error('bad-qr');

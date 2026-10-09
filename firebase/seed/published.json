@@ -12,18 +12,21 @@
     "refPerStar": 0.321
   },
   "grades": { "12": 6, "11": 5, "10": 4, "9": 3, "8": 2, "7": 1 },
-  "questMonthlyCap": 8,
+  "questMonthlyCap": 30,
+  "questWeeklyCap": 15,
   "shop": [
     { "id": "caramel", "name": "Карамель", "icon": "🍬", "category": "sweet", "price": 7, "active": true, "order": 1, "unitCost": 2.25 },
     { "id": "jelly", "name": "Желейка", "icon": "🍮", "category": "sweet", "price": 12, "active": true, "order": 2, "unitCost": 3.96 },
-    { "id": "tartlet", "name": "Тарталетка", "icon": "🥧", "category": "sweet", "price": 17, "active": true, "order": 3, "limits": { "cooldownDays": 30 }, "unitCost": 15.0, "acceptSubsidy": true },
-    { "id": "priv_music", "name": "Музика на перерві", "icon": "🎵", "category": "privilege", "price": 6, "active": true, "order": 4, "limits": { "perMonth": 2 }, "unitCost": 0 },
-    { "id": "priv_pc", "name": "10 хв творчого часу за комп'ютером", "icon": "💻", "category": "privilege", "price": 8, "active": true, "order": 5, "limits": { "perMonth": 2 }, "unitCost": 0 }
+    { "id": "tartlet", "name": "Тарталетка", "icon": "🥧", "category": "sweet", "price": 17, "active": true, "order": 3, "stock": 3, "unitCost": 15.0, "acceptSubsidy": true },
+    { "id": "priv_music", "name": "Музика на перерві", "icon": "🎵", "category": "privilege", "price": 6, "active": true, "order": 4, "unitCost": 0 },
+    { "id": "priv_pc", "name": "10 хв творчого часу за комп'ютером", "icon": "💻", "category": "privilege", "price": 8, "active": true, "order": 5, "unitCost": 0 }
   ],
   "quests": [
-    { "id": "growth", "type": "growth", "title": "Зростання", "icon": "📈", "active": true, "reward": 3, "perMonth": 2, "params": { "window": 10, "minHistory": 5, "delta": 2, "minGrade": 7 } },
-    { "id": "streak", "type": "streak", "title": "Активний тиждень", "icon": "🔥", "active": true, "reward": 2, "perMonth": 2, "params": { "length": 3, "minGrade": 8, "windowDays": 7 } },
-    { "id": "contrib", "type": "manual", "title": "Внесок у клас", "icon": "🤝", "active": true, "reward": 2, "perMonth": 2 }
+    { "id": "knowledge_gatherer", "type": "weekly_count", "title": "Збирач знань", "icon": "📚", "period": "weekly", "active": true, "reward": 3, "perWeek": 1, "params": { "count": 4 }, "desc": "Отримай 4 будь-які оцінки протягом тижня" },
+    { "id": "sequence", "type": "consecutive", "title": "Послідовність", "icon": "🎯", "period": "weekly", "active": true, "reward": 3, "perWeek": 1, "params": { "minGrade": 7, "length": 3 }, "desc": "3 оцінки від 7 балів поспіль" },
+    { "id": "brilliant_result", "type": "target_grade", "title": "Блискучий результат", "icon": "✨", "period": "weekly", "active": true, "reward": 4, "perWeek": 2, "params": { "grade": 12 }, "desc": "Отримай оцінку 12 (до 2 разів на тиждень)" },
+    { "id": "steady_step", "type": "monthly_growth", "title": "Впевнений крок", "icon": "📈", "period": "monthly", "active": true, "reward": 10, "perMonth": 1, "params": { "minTotalGrades": 10 }, "desc": "Середній бал місяця вищий за попередній (від 10 оцінок)" },
+    { "id": "holding_height", "type": "monthly_average", "title": "Утримання висоти", "icon": "👑", "period": "monthly", "active": true, "reward": 15, "perMonth": 1, "params": { "minAverage": 10 }, "desc": "Середній бал понад 10 протягом місяця" }
   ],
   "levels": [
     { "min": 0, "name": "Іскорка" },
@@ -31,7 +34,17 @@
     { "min": 80, "name": "Сузір'я" },
     { "min": 150, "name": "Туманність" },
     { "min": 250, "name": "Галактика" },
-    { "min": 400, "name": "Всесвіт" }
+    { "min": 400, "name": "Всесвіт" },
+    { "min": 600, "name": "Наднова" },
+    { "min": 850, "name": "Пульсар" },
+    { "min": 1150, "name": "Квазар" },
+    { "min": 1500, "name": "Астральний Вартовий" },
+    { "min": 2000, "name": "Магістр Ефіру" },
+    { "min": 3000, "name": "Астральний Лорд" },
+    { "min": 4500, "name": "Хранитель Селестії" },
+    { "min": 6000, "name": "Володар Зорепаду" },
+    { "min": 8000, "name": "Творець Ефіру" },
+    { "min": 10000, "name": "Легенда Всесвіту" }
   ],
   "news": [
     { "id": "n1", "date": "2026-10-09", "text": "Нова нагорода місяця!" }

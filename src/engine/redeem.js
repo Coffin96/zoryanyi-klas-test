@@ -1,11 +1,12 @@
 import { kyivParts } from './time.js';
 import { bump, snapshot, fail } from './utils.js';
 
-export function redeem(p, item, qty, cfg, nowMs, stock) {
+export function redeem(p, item, qty, cfg, nowMs, stock = {}) {
   const { month } = kyivParts(nowMs);
   if (!item || !item.active) return fail('inactive');
   if (qty < 1) return fail('qty');
-  if (stock[item.id] != null && stock[item.id] < qty) return fail('out-of-stock');
+  if (stock && stock[item.id] != null && stock[item.id] < qty) return fail('out-of-stock');
+  if (typeof item.stock === 'number' && item.stock < qty) return fail('out-of-stock');
   if (p.balance < item.price * qty) return fail('insufficient', { missing: item.price * qty - p.balance });
   
   const lim = item.limits ?? {};

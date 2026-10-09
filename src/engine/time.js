@@ -17,7 +17,13 @@ function getKyivWeek(y, m, d) {
  * @returns {{ymd: string, month: string, day: number, week: string}}
  */
 export function kyivParts(ms) {
-  const [y, m, d] = fmt.format(ms).split('-').map(Number);
+  const parts = fmt.formatToParts(ms);
+  let y = 0, m = 0, d = 0;
+  for (const p of parts) {
+    if (p.type === 'year') y = Number(p.value);
+    else if (p.type === 'month') m = Number(p.value);
+    else if (p.type === 'day') d = Number(p.value);
+  }
   return {
     ymd: `${String(y).slice(2)}${String(m).padStart(2, '0')}${String(d).padStart(2, '0')}`,
     month: `${String(y).slice(2)}${String(m).padStart(2, '0')}`,

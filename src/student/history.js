@@ -1,61 +1,46 @@
 import { listenLedger } from '../data/repo.js';
 import { iconFiligreeDivider, iconPrimogem } from '../components/genshin-icons.js';
+import { renderStudentStats } from './stats.js';
 
 export function renderHistory(root, state) {
   root.innerHTML = `
     <div class="container">
       <div class="text-center" style="margin-bottom: var(--spacing-sm);">
         <h2 class="fantasy-title" style="margin: 0 0 4px 0; font-size: 22px;">Хроніка пригод</h2>
-        <p class="text-muted" style="margin: 0; font-size: 13px;">Журнал зароблених та витрачених зірок</p>
+        <p class="text-muted" style="margin: 0; font-size: 13px;">Журнал успішності, зароблених та витрачених зірок</p>
         ${iconFiligreeDivider()}
       </div>
       
-      <!-- Мої оцінки (стилізовані під золоті монети / медалі) -->
-      <div id="stats-container" class="surface-card flex flex-col gap-sm" style="margin-bottom: var(--spacing-md); display: none; padding: 14px 16px;">
-        <h3 class="fantasy-title" style="margin: 0 0 8px 0; font-size: 14px; color: var(--gold-light);">Мої оцінки у щоденнику</h3>
-        <div id="grade-stats-list" class="flex gap-sm" style="flex-wrap: wrap;"></div>
-      </div>
+      <!-- Секція статистики та графіків успішності учня -->
+      <div id="student-stats-section"></div>
 
       <!-- Хронологічний список записів -->
+      <div class="flex justify-between items-center" style="margin: var(--spacing-md) 0 var(--spacing-xs) 0; padding: 0 4px;">
+        <h3 class="fantasy-title" style="margin: 0; font-size: 16px; color: var(--gold-light);">Останні події</h3>
+        <span class="text-muted" style="font-size: 12px;">Журнал операцій</span>
+      </div>
       <div id="history-list" class="flex flex-col gap-sm">
         <p class="text-muted text-center" style="margin-top: 20px;">Завантаження хроніки...</p>
       </div>
     </div>
   `;
 
-  if (state.profile && state.profile.stats && state.profile.stats.gradeCount) {
-    const grades = state.profile.stats.gradeCount;
-    const statsList = document.getElementById('grade-stats-list');
-    const statsContainer = document.getElementById('stats-container');
-    let hasStats = false;
-    
-    // Сортуємо оцінки за спаданням (12, 11, 10...)
-    const sortedGrades = Object.keys(grades).sort((a, b) => Number(b) - Number(a));
-    
-    let statsHtml = '';
-    sortedGrades.forEach(grade => {
-      if (grades[grade] > 0) {
-        hasStats = true;
-        statsHtml += `
-          <div style="background: rgba(10, 15, 34, 0.7); padding: 6px 12px; border-radius: var(--radius-md); border: 1.5px solid var(--gold-border); display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 2px 6px rgba(0,0,0,0.3);">
-            <span style="font-weight: 800; font-size: 16px; color: var(--gold-primary); font-family: var(--font-fantasy);">${grade}</span>
-            <span style="color: var(--muted); font-size: 12px;">× ${grades[grade]}</span>
-          </div>
-        `;
-      }
-    });
-
-    if (hasStats) {
-      statsList.innerHTML = statsHtml;
-      statsContainer.style.display = 'flex';
-    }
+  const statsSection = document.getElementById('student-stats-section');
+  if (statsSection) {
+    renderStudentStats(statsSection, { profile: state.profile, ledgerItems: [] });
   }
 
-  const unsubscribe = listenLedger(state.uuid, 20, (items) => {
+  const unsubscribe = listenLedger(state.uuid, 50, (items) => {
     const listDiv = document.getElementById('history-list');
     if (!listDiv) {
       unsubscribe();
       return;
+    }
+
+    // Оновлюємо статистику з новими даними журналу
+    const statsContainer = document.getElementById('student-stats-section');
+    if (statsContainer) {
+      renderStudentStats(statsContainer, { profile: state.profile, ledgerItems: items });
     }
 
     if (items.length === 0) {

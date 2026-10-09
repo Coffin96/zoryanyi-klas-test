@@ -54,18 +54,23 @@ export function renderQuests(root, state) {
       <!-- Список завдань у стилі Книги Шукача Пригод -->
       <div class="flex flex-col gap-sm">
         ${quests.map(quest => {
-          const isWeekly = quest.period === 'week' || quest.perWeek != null;
+          const isWeekly = quest.period === 'week' || quest.period === 'weekly' || quest.perWeek != null;
           const counters = isWeekly ? weekCounters : monthCounters;
           const currentStars = isWeekly ? weekStars : monthStars;
           const currentCap = isWeekly ? weeklyCap : monthlyCap;
-          const limit = isWeekly ? (quest.perWeek ?? quest.perMonth ?? 2) : (quest.perMonth ?? 2);
+          const limit = isWeekly ? (quest.perWeek ?? quest.limit ?? quest.perMonth ?? 1) : (quest.perMonth ?? quest.limit ?? 1);
           const count = counters[quest.id] || 0;
           const isDone = count >= limit || currentStars >= currentCap;
           const percent = Math.min(100, Math.floor((count / limit) * 100));
 
-          let desc = quest.desc;
+          let desc = quest.desc || quest.description;
           if (!desc) {
-            if (quest.type === 'growth') desc = 'Отримай оцінку, вищу за середній бал твоїх робіт';
+            if (quest.type === 'weekly_count' || quest.type === 'grade_count') desc = 'Отримай 4 оцінки протягом тижня';
+            else if (quest.type === 'consecutive') desc = '3 оцінки від 7 балів поспіль';
+            else if (quest.type === 'target_grade' || quest.type === 'grade') desc = 'Отримай оцінку 12';
+            else if (quest.type === 'monthly_growth') desc = 'Підвищ середній бал порівняно з минулим місяцем';
+            else if (quest.type === 'monthly_average') desc = 'Середній бал понад 10 протягом місяця';
+            else if (quest.type === 'growth') desc = 'Отримай оцінку, вищу за середній бал твоїх робіт';
             else if (quest.type === 'streak') desc = '3 оцінки від 8 балів протягом 7 днів';
             else if (quest.type === 'manual') desc = 'Корисна допомога класу або спільній справі';
             else desc = 'Спеціальне завдання';

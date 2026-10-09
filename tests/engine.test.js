@@ -57,7 +57,7 @@ describe('Engine Tests', () => {
 
   test('E4: Growth - без бонусу (10 < 10.2)', () => {
     const p = emptyProfile();
-    p.recent = [8, 8, 9, 8, 8];
+    p.recent = [10, 10, 11, 10, 10];
     const res = creditGrades(p, [10], mockCfg, 1000);
     assert.strictEqual(res.delta, 4); // Тільки за оцінку 10 (4 ✦)
   });
