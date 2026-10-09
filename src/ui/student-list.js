@@ -4,50 +4,53 @@ import { getInitials } from '../data/names-db.js';
 import { doc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { db } from '../data/firebase.js';
 import { generateQRUrl } from '../engine/qr-protocol.js';
+import { iconPrimogem, iconFiligreeDivider } from '../components/genshin-icons.js';
 
 export async function renderStudentList(root) {
   root.innerHTML = `
     <div class="container">
-      <div class="top-bar">
-        <h2 style="margin:0;">Учні класу</h2>
+      <div class="top-bar flex justify-between items-center">
+        <h2 class="fantasy-title" style="margin:0; font-size: 20px;">Учні класу</h2>
         <div class="flex gap-sm">
-          <button id="btn-quick-scan" class="primary" style="padding: 6px 12px; font-size: 13px;">📷 Сканер</button>
+          <button id="btn-quick-scan" class="btn-genshin-gold" style="padding: 6px 14px; font-size: 13px; min-height: 36px; border-radius: 12px;">
+            📷 Сканер
+          </button>
         </div>
       </div>
 
       <!-- Швидке створення учня -->
-      <div class="surface-card" style="margin-bottom: var(--spacing-md); padding: 14px 16px;">
-        <div style="font-weight: 600; font-size: 14px; margin-bottom: 8px;">➕ Додати учня:</div>
+      <div class="surface-card" style="margin-bottom: var(--spacing-md); padding: 14px 16px; border: 1.5px solid var(--gold-border);">
+        <div class="fantasy-title" style="font-weight: 600; font-size: 14px; margin-bottom: 8px; color: var(--gold-light);">➕ Додати учня до класу:</div>
         <form id="form-quick-add" class="flex gap-sm">
-          <input type="text" id="quick-alias-input" placeholder="Псевдонім (напр. Сокіл-01)" maxlength="24" required style="flex:1; min-height: 44px; padding: 8px 12px; font-size: 15px;">
-          <button type="submit" id="btn-quick-submit" class="primary" style="min-height: 44px; padding: 8px 16px; white-space: nowrap;">Створити</button>
+          <input type="text" id="quick-alias-input" placeholder="Псевдонім (напр. Сокіл-01)" maxlength="24" required style="flex:1; min-height: 44px; padding: 8px 12px; font-size: 14px;">
+          <button type="submit" id="btn-quick-submit" class="btn-genshin-gold" style="min-height: 44px; padding: 8px 16px; white-space: nowrap; border-radius: 12px;">Створити</button>
         </form>
       </div>
 
       <!-- Додаткові дії -->
       <div class="flex gap-sm" style="margin-bottom: var(--spacing-md);">
-        <button id="btn-batch-add" style="flex:1; padding: 10px; background: var(--surface); border: 1px solid rgba(255,255,255,0.1); font-size: 14px;">📝 Списком</button>
-        <button id="btn-print-cards-nav" class="primary" style="flex:1; padding: 10px; font-size: 14px;">🖨️ Друк карток</button>
+        <button id="btn-batch-add" class="surface-card" style="flex:1; padding: 10px; font-size: 13px; border: 1px solid var(--gold-border); justify-content: center; color: var(--gold-light); cursor: pointer; border-radius: 12px;">📝 Списком</button>
+        <button id="btn-print-cards-nav" class="btn-genshin-gold" style="flex:1; padding: 10px; font-size: 13px; border-radius: 12px;">🖨️ Друк карток</button>
       </div>
 
       <div class="surface-card">
         <input type="text" id="search" placeholder="Пошук за псевдонімом чи ініціалами..." style="margin-bottom: var(--spacing-md); width:100%; min-height: 44px;">
         <div id="list-container" class="flex flex-col gap-sm">
-          <p class="text-muted text-center" style="padding: 16px;">Завантаження...</p>
+          <p class="text-muted text-center" style="padding: 16px;">Завантаження реєстру...</p>
         </div>
       </div>
     </div>
 
     <!-- Модальне вікно для відображення QR учня прямо на екрані -->
-    <div id="qr-modal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.8); z-index:200; align-items:center; justify-content:center; padding:16px;">
-      <div class="surface-card text-center" style="max-width:320px; width:100%; padding:24px; position:relative;">
-        <h3 id="modal-alias" style="margin-top:0; margin-bottom:8px;"></h3>
-        <p class="text-muted" style="font-size:13px; margin-bottom:16px;">Учень може відсканувати цей QR камерою телефона:</p>
-        <div id="modal-qr-container" style="background:white; padding:12px; border-radius:12px; display:inline-block; margin-bottom:16px;"></div>
-        <div id="modal-url" class="text-muted" style="font-size:11px; word-break:break-all; margin-bottom:16px;"></div>
+    <div id="qr-modal" class="genshin-modal-overlay" style="display:none;">
+      <div class="genshin-modal-content text-center">
+        <h3 id="modal-alias" class="fantasy-title" style="margin-top:0; margin-bottom:6px; color:var(--text-parchment);"></h3>
+        <p style="font-size:12px; color:var(--text-parchment-muted); margin-bottom:12px;">Учень може відсканувати цей QR камерою телефона:</p>
+        <div id="modal-qr-container" style="background:#fff; padding:12px; border-radius:14px; border:2px solid var(--gold-border); display:inline-block; margin-bottom:12px;"></div>
+        <div id="modal-url" style="font-size:11px; word-break:break-all; margin-bottom:16px; color:var(--text-parchment-subtle);"></div>
         <div class="flex gap-sm">
-          <button id="btn-copy-link" style="flex:1; padding:8px; font-size:13px;">📋 Скопіювати</button>
-          <button id="btn-close-modal" class="primary" style="flex:1; padding:8px; font-size:13px;">Закрити</button>
+          <button id="btn-copy-link" class="parchment-card" style="flex:1; padding:8px; font-size:13px; justify-content:center; cursor:pointer;">📋 Скопіювати</button>
+          <button id="btn-close-modal" class="btn-genshin-gold" style="flex:1; padding:8px; font-size:13px; justify-content:center; border-radius:12px;">Закрити</button>
         </div>
       </div>
     </div>
@@ -108,7 +111,7 @@ export async function renderStudentList(root) {
       });
 
       input.value = '';
-      showToast(`Учня ${alias} успішно створено!`);
+      showToast(`Учня "${alias}" успішно створено!`);
       // Оновити список
       profiles = await getActiveProfiles();
       renderListFiltered(document.getElementById('search').value);
@@ -149,18 +152,20 @@ export async function renderStudentList(root) {
 
     listContainer.innerHTML = filtered.map(p => {
       const initials = getInitials(p.alias);
-      const display = initials ? `${p.alias} <span class="text-muted">(${initials})</span>` : p.alias;
+      const display = initials ? `${p.alias} <span style="color:var(--text-parchment-muted); font-size:13px;">(${initials})</span>` : p.alias;
       return `
-        <div class="shop-item flex justify-between items-center" style="padding: 10px 12px; gap: 8px; flex-wrap: wrap;">
-          <div class="btn-open-student flex flex-col" data-id="${p.id}" data-alias="${p.alias}" style="cursor: pointer; flex: 1; min-width: 160px;">
-            <div style="font-size: 16px; font-weight: bold;">${display}</div>
-            <div class="text-muted" style="font-size: 12px; margin-top: 2px;">Баланс: <span style="color:var(--star); font-weight:bold;">${p.balance} ✦</span> (зароблено ${p.earned} ✦)</div>
+        <div class="parchment-card flex justify-between items-center" style="padding: 10px 14px; gap: 8px; flex-wrap: wrap;">
+          <div class="btn-open-student flex flex-col" data-id="${p.id}" data-alias="${p.alias}" style="cursor: pointer; flex: 1; min-width: 150px;">
+            <div style="font-size: 15px; font-weight: 700; color: var(--text-parchment);">${display}</div>
+            <div style="font-size: 12px; margin-top: 2px; color: var(--text-parchment-muted);">
+              Баланс: <strong style="color:var(--gold-deep); font-family:var(--font-fantasy);">${p.balance} ✦</strong> (зароблено ${p.earned} ✦)
+            </div>
           </div>
           <div class="flex items-center gap-xs" style="flex-wrap: nowrap;">
-            <button class="btn-show-qr" data-id="${p.id}" data-alias="${p.alias}" title="Показати QR для учня" style="padding: 8px 10px; min-height: 40px; min-width: 40px; background: rgba(255,255,255,0.06); font-size: 16px;">
+            <button class="btn-show-qr" data-id="${p.id}" data-alias="${p.alias}" title="Показати QR для учня" style="padding: 6px 10px; min-height: 38px; min-width: 38px; background: var(--surface-parchment-inner); border: 1px solid var(--gold-border); border-radius: 10px; font-size: 15px; cursor: pointer;">
               📱
             </button>
-            <button class="btn-open-student primary" data-id="${p.id}" data-alias="${p.alias}" style="padding: 8px 12px; min-height: 40px; font-size: 13px; font-weight: bold; white-space: nowrap;">
+            <button class="btn-open-student btn-genshin-gold" data-id="${p.id}" data-alias="${p.alias}" style="padding: 6px 12px; min-height: 38px; font-size: 12px; font-weight: bold; white-space: nowrap; border-radius: 10px;">
               Відкрити →
             </button>
           </div>

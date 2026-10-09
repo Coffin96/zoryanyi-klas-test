@@ -6,6 +6,7 @@ import { getInitials } from '../data/names-db.js';
 import { generateQRUrl } from '../engine/qr-protocol.js';
 import { doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { db } from '../data/firebase.js';
+import { iconPrimogem, iconRankCrest, iconFiligreeDivider } from '../components/genshin-icons.js';
 
 let unsubscribeProfile = null;
 let profile = null;
@@ -20,21 +21,25 @@ export function renderStudentPanel(root) {
   root.innerHTML = `
     <div class="container">
       <div class="top-bar flex justify-between items-center" style="gap: 8px;">
-        <button id="btn-back-list" class="primary" style="padding: 6px 12px; font-size: 13px;">← До списку</button>
+        <button id="btn-back-list" class="btn-genshin-gold" style="padding: 6px 14px; font-size: 13px; min-height: 36px; border-radius: 12px;">
+          ← До списку
+        </button>
         <div class="flex items-center gap-xs">
-          <h2 id="panel-title-alias" style="margin:0; font-size: 18px;">${aliasDisplay}</h2>
-          <button id="btn-edit-student-alias" style="background:transparent; border:none; cursor:pointer; font-size:16px; padding:2px;" title="Змінити псевдонім">✏️</button>
+          <h2 id="panel-title-alias" class="fantasy-title" style="margin:0; font-size: 18px;">${aliasDisplay}</h2>
+          <button id="btn-edit-student-alias" style="background:transparent; border:none; cursor:pointer; font-size:15px; padding:2px; min-height:auto; min-width:auto; color:var(--gold-light);" title="Змінити псевдонім">✏️</button>
         </div>
-        <button id="btn-to-scanner-top" class="primary" style="padding: 6px 12px; font-size: 13px;">📷 Сканер</button>
+        <button id="btn-to-scanner-top" class="btn-genshin-gold" style="padding: 6px 14px; font-size: 13px; min-height: 36px; border-radius: 12px;">
+          📷 Сканер
+        </button>
       </div>
 
-      <!-- Картка учня з балансом та QR-кнопкою -->
-      <div class="surface-card flex justify-between items-center" style="margin-bottom: var(--spacing-md); padding: 12px 16px;">
+      <!-- Картка учня з балансом та QR-кнопкою (у стилі Genshin) -->
+      <div class="surface-card flex justify-between items-center" style="margin-bottom: var(--spacing-md); padding: 14px 18px; border: 1.5px solid var(--gold-border);">
         <div>
-          <div style="font-size: 12px; color: var(--muted);" id="panel-level">Рівень: ...</div>
-          <div style="font-size: 32px; font-weight: bold; color: var(--star); line-height: 1.1;" id="panel-balance">-- ✦</div>
+          <div style="font-size: 12px; color: var(--gold-light); text-transform: uppercase; letter-spacing: 0.05em;" id="panel-level">Рівень: ...</div>
+          <div style="font-size: 34px; font-weight: 800; font-family: var(--font-fantasy); color: var(--star); line-height: 1.1; text-shadow: 0 0 12px var(--gold-glow);" id="panel-balance">-- ✦</div>
         </div>
-        <button id="btn-open-qr" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); padding: 8px 12px; font-size: 13px;">
+        <button id="btn-open-qr" class="surface-card" style="padding: 8px 14px; font-size: 13px; border: 1px solid var(--gold-border); border-radius: 14px; min-height: 42px; color: var(--gold-light); cursor: pointer;">
           📱 QR для учня
         </button>
       </div>
@@ -42,47 +47,53 @@ export function renderStudentPanel(root) {
       <!-- Банер активного замовлення учня за QR-кодом -->
       <div id="order-banner-container"></div>
 
-      <!-- Оцінки -->
+      <!-- Оцінки з щоденника (Клавіатура у стилі талантів Genshin) -->
       <div class="surface-card" style="margin-bottom: var(--spacing-md);">
-        <p class="text-muted" style="margin-top:0; font-weight: 600;">Оцінки з щоденника:</p>
+        <p class="fantasy-title" style="margin-top:0; margin-bottom: 10px; font-size: 15px; color: var(--gold-light);">Оцінки з щоденника:</p>
         <div id="grades-grid" class="grades-grid"></div>
         
-        <div id="calc-preview" style="min-height: 24px; margin-bottom: var(--spacing-md); color: var(--ok); font-weight: bold; font-size: 14px;"></div>
+        <div id="calc-preview" style="min-height: 24px; margin-bottom: var(--spacing-md); color: var(--cyan-accent); font-weight: bold; font-size: 14px; text-shadow: 0 0 8px var(--cyan-glow);"></div>
         
-        <button id="btn-credit" class="primary" style="width: 100%;" disabled>Зарахувати оцінки</button>
+        <button id="btn-credit" class="btn-genshin-gold" style="width: 100%; padding: 13px; font-size: 16px; border-radius: 14px;" disabled>
+          Зарахувати оцінки
+        </button>
       </div>
 
       <!-- Нагороди та квести -->
       <div class="surface-card">
-        <p class="text-muted" style="margin-top:0; font-weight: 600;">Обмін на нагороди:</p>
+        <p class="fantasy-title" style="margin-top:0; margin-bottom: 8px; font-size: 15px; color: var(--gold-light);">Обмін на нагороди:</p>
         <div id="shop-list" class="shop-grid"></div>
         
-        <p class="text-muted" style="margin-top: var(--spacing-md); margin-bottom: 8px; font-weight: 600;">Ручні квести («Внесок у клас»):</p>
+        <p class="fantasy-title" style="margin-top: var(--spacing-md); margin-bottom: 8px; font-size: 15px; color: var(--gold-light);">Ручні квести («Внесок у клас»):</p>
         <div id="quests-list" class="shop-grid"></div>
       </div>
 
       <div class="flex gap-sm" style="margin-top: var(--spacing-md);">
-        <button id="btn-next-student" class="primary" style="flex:1; padding: 12px;">📷 Наступний учень (сканер)</button>
-        <button id="btn-back-bottom" style="flex:1; padding: 12px; background: var(--surface);">👥 До списку учнів</button>
+        <button id="btn-next-student" class="btn-genshin-gold" style="flex:1; padding: 13px; font-size: 14px; border-radius: 14px;">
+          📷 Наступний учень
+        </button>
+        <button id="btn-back-bottom" class="surface-card" style="flex:1; padding: 13px; font-size: 14px; border-radius: 14px; border: 1px solid var(--gold-border); text-align: center; justify-content: center; color: var(--gold-light); cursor: pointer;">
+          👥 До списку учнів
+        </button>
       </div>
 
       <div style="margin-top: var(--spacing-lg); text-align: center; padding-bottom: 16px;">
-        <button id="btn-delete-student" class="danger" style="background: transparent; border: 1px solid var(--danger); color: var(--danger); font-size: 13px; padding: 8px 16px; min-height: auto;">
+        <button id="btn-delete-student" class="btn-genshin-crimson" style="font-size: 13px; padding: 8px 18px; min-height: 38px; border-radius: 14px;">
           🗑️ Видалити учня з класу
         </button>
       </div>
     </div>
 
     <!-- Модальне вікно для QR-коду учня -->
-    <div id="student-qr-modal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.8); z-index:200; align-items:center; justify-content:center; padding:16px;">
-      <div class="surface-card text-center" style="max-width:320px; width:100%; padding:24px;">
-        <h3 style="margin-top:0; margin-bottom:4px;">${aliasDisplay}</h3>
-        <p class="text-muted" style="font-size:12px; margin-bottom:12px;">Учень може відсканувати цей QR прямо зараз:</p>
-        <div id="panel-qr-container" style="background:white; padding:12px; border-radius:12px; display:inline-block; margin-bottom:12px;"></div>
-        <div id="panel-url-text" class="text-muted" style="font-size:11px; word-break:break-all; margin-bottom:16px;"></div>
+    <div id="student-qr-modal" class="genshin-modal-overlay" style="display:none;">
+      <div class="genshin-modal-content text-center">
+        <h3 id="panel-modal-alias" class="fantasy-title" style="margin-top:0; margin-bottom:4px; color:var(--text-parchment);">${aliasDisplay}</h3>
+        <p style="font-size:12px; color:var(--text-parchment-muted); margin-bottom:12px;">Учень може відсканувати цей QR прямо зараз:</p>
+        <div id="panel-qr-container" style="background:#fff; padding:12px; border-radius:14px; border:2px solid var(--gold-border); display:inline-block; margin-bottom:12px;"></div>
+        <div id="panel-url-text" style="font-size:11px; word-break:break-all; margin-bottom:16px; color:var(--text-parchment-subtle);"></div>
         <div class="flex gap-sm">
-          <button id="btn-copy-url" style="flex:1; padding:8px; font-size:13px;">📋 Скопіювати</button>
-          <button id="btn-close-qr" class="primary" style="flex:1; padding:8px; font-size:13px;">Закрити</button>
+          <button id="btn-copy-url" class="parchment-card" style="flex:1; padding:8px; font-size:13px; justify-content:center; cursor:pointer;">📋 Скопіювати</button>
+          <button id="btn-close-qr" class="btn-genshin-gold" style="flex:1; padding:8px; font-size:13px; justify-content:center; border-radius:12px;">Закрити</button>
         </div>
       </div>
     </div>
@@ -311,13 +322,19 @@ function renderShop() {
   shop.forEach(item => {
     const canAfford = profile.balance >= item.price;
     const btn = document.createElement('button');
-    btn.className = `shop-item ${canAfford ? '' : 'disabled'}`;
+    btn.className = `parchment-card ${canAfford ? '' : 'disabled'}`;
     btn.style.width = '100%';
     btn.style.textAlign = 'left';
+    btn.style.cursor = canAfford ? 'pointer' : 'not-allowed';
+    btn.style.opacity = canAfford ? '1' : '0.6';
+    btn.style.display = 'flex';
+    btn.style.justifyContent = 'space-between';
+    btn.style.alignItems = 'center';
+    btn.style.padding = '10px 14px';
     btn.innerHTML = `
-      <span style="font-size: 16px; font-weight: bold;">${item.icon} ${item.name}</span>
-      <span style="font-weight: bold; color: ${canAfford ? 'var(--ok)' : 'var(--text)'};">
-        ${item.price} ✦ ${canAfford ? '' : '(бракує ' + (item.price - profile.balance) + ')'}
+      <span style="font-size: 15px; font-weight: 700; color: var(--text-parchment);">${item.icon} ${item.name}</span>
+      <span style="font-weight: 800; font-family: var(--font-fantasy); color: ${canAfford ? 'var(--gold-deep)' : 'var(--text-parchment-muted)'}; font-size: 14px;">
+        ${item.price} ✦ ${canAfford ? '✓' : '(бракує ' + (item.price - profile.balance) + ')'}
       </span>
     `;
     
@@ -337,12 +354,17 @@ function renderQuests() {
   
   quests.forEach(q => {
     const btn = document.createElement('button');
-    btn.className = 'shop-item';
+    btn.className = 'parchment-card';
     btn.style.width = '100%';
     btn.style.textAlign = 'left';
+    btn.style.cursor = 'pointer';
+    btn.style.display = 'flex';
+    btn.style.justifyContent = 'space-between';
+    btn.style.alignItems = 'center';
+    btn.style.padding = '10px 14px';
     btn.innerHTML = `
-      <span style="font-size: 16px; font-weight: bold;">${q.icon} ${q.title || q.name}</span>
-      <span style="color: var(--ok); font-weight: bold;">+${q.reward} ✦</span>
+      <span style="font-size: 15px; font-weight: 700; color: var(--text-parchment);">${q.icon} ${q.title || q.name}</span>
+      <span class="badge-gold">+${q.reward} ✦</span>
     `;
     btn.addEventListener('click', () => handleManualQuest(q));
     questsList.appendChild(btn);
@@ -413,9 +435,9 @@ function renderOrderBanner() {
   const canAfford = profile.balance >= totalCost;
 
   container.innerHTML = `
-    <div class="surface-card flex justify-between items-center" style="margin-bottom: var(--spacing-md); border: 2px solid var(--accent); background: rgba(124, 77, 255, 0.12); padding: 14px;">
+    <div class="surface-card flex justify-between items-center" style="margin-bottom: var(--spacing-md); border: 2px solid var(--gold-primary); background: rgba(14, 38, 56, 0.95); padding: 14px;">
       <div>
-        <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--accent); font-weight: bold;">
+        <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--gold-light); font-weight: bold;">
           🎁 Замовлення за QR-кодом
         </div>
         <div style="font-size: 17px; font-weight: bold; margin-top: 2px;">
@@ -423,14 +445,14 @@ function renderOrderBanner() {
         </div>
         <div style="font-size: 13px; color: var(--muted); margin-top: 2px;">
           Вартість: <strong style="color: var(--star);">${totalCost} ✦</strong> 
-          ${canAfford ? `<span style="color: var(--ok);">(вистачає)</span>` : `<span style="color: var(--danger);">(бракує ${totalCost - profile.balance} ✦)</span>`}
+          ${canAfford ? `<span style="color: var(--cyan-accent);">(вистачає)</span>` : `<span style="color: #ffa3a3;">(бракує ${totalCost - profile.balance} ✦)</span>`}
         </div>
       </div>
       <div class="flex gap-xs items-center">
-        <button id="btn-fulfill-order" class="primary" style="padding: 10px 14px; font-weight: bold;" ${canAfford ? '' : 'disabled'}>
+        <button id="btn-fulfill-order" class="btn-genshin-gold" style="padding: 8px 14px; font-size: 13px; font-weight: bold; min-height: 38px; border-radius: 12px;" ${canAfford ? '' : 'disabled'}>
           Видати ✓
         </button>
-        <button id="btn-dismiss-order" style="padding: 8px 10px; background: transparent; border: 1px solid rgba(255,255,255,0.2); font-size: 14px;" title="Закрити замовлення">
+        <button id="btn-dismiss-order" style="padding: 6px 10px; min-height: 38px; background: transparent; border: 1px solid rgba(255,255,255,0.2); font-size: 14px; border-radius: 10px; color: var(--muted);" title="Закрити замовлення">
           ✕
         </button>
       </div>

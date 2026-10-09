@@ -5,23 +5,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Зоряний клас</title>
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#0e1230">
+  <meta name="theme-color" content="#0b0f20">
   <link rel="stylesheet" href="styles/base.css">
   <script src="vendor/qrcode.min.js"></script>
 </head>
 <body>
   <div id="app">
     <div style="min-height: 85vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 24px;">
-      <div style="font-size: 56px; color: #ffc53d; margin-bottom: 12px;">✦</div>
-      <h1 style="font-size: 24px; margin: 0 0 8px 0; color: #f2f4ff;">Зоряний клас</h1>
-      <p style="color: #a9b0e0; font-size: 15px; margin: 0;">Завантаження застосунку...</p>
+      <div style="font-size: 56px; color: #ffc947; margin-bottom: 12px; filter: drop-shadow(0 0 16px rgba(229,195,120,0.6));">✦</div>
+      <h1 class="fantasy-title" style="font-size: 26px; margin: 0 0 8px 0; color: #f5f2e9;">Зоряний клас</h1>
+      <p style="color: #9ba4c4; font-size: 15px; margin: 0;">Завантаження застосунку...</p>
     </div>
   </div>
   <script>
     window.addEventListener('error', function(e) {
       var app = document.getElementById('app');
       if (app && app.innerHTML.includes('Завантаження застосунку')) {
-        app.innerHTML = '<div style="min-height: 85vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 24px; color: #f2f4ff;"><div style="font-size: 48px; color: #ff6b6b; margin-bottom: 12px;">⚠️</div><h2 style="margin: 0 0 8px 0;">Помилка завантаження</h2><p style="color: #ff6b6b; max-width: 320px; font-size: 14px; margin-bottom: 20px;">' + (e.message || 'Не вдалося завантажити модулі') + '</p><button id="btn-force-reload" style="background: #8b7bff; color: white; border: none; padding: 12px 24px; border-radius: 12px; font-weight: bold; cursor: pointer;">Очистити кеш та оновити</button></div>';
+        app.innerHTML = '<div style="min-height: 85vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 24px; color: #f5f2e9;"><div style="font-size: 48px; color: #cf4343; margin-bottom: 12px;">⚠️</div><h2 style="margin: 0 0 8px 0;">Помилка завантаження</h2><p style="color: #ff8585; max-width: 320px; font-size: 14px; margin-bottom: 20px;">' + (e.message || 'Не вдалося завантажити модулі') + '</p><button id="btn-force-reload" style="background: linear-gradient(180deg, #fae5b5 0%, #e0bc6e 60%, #c59940 100%); color: #2b1f09; border: 1px solid #fae5b5; padding: 12px 24px; border-radius: 12px; font-weight: bold; cursor: pointer;">Очистити кеш та оновити</button></div>';
         var btn = document.getElementById('btn-force-reload');
         if (btn) {
           btn.onclick = function() {

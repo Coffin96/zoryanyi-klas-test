@@ -1,5 +1,6 @@
 import { encodeR } from '../engine/qr-protocol.js';
 import { kyivParts } from '../engine/time.js';
+import { iconFiligreeDivider, iconPrimogem } from '../components/genshin-icons.js';
 
 export function renderShop(root, state) {
   const p = state.profile;
@@ -8,41 +9,49 @@ export function renderShop(root, state) {
 
   root.innerHTML = `
     <div class="container">
-      <h2>Магазин нагород</h2>
-      <p class="text-muted" style="margin-bottom: var(--spacing-md);">Обирай нагороду та покажи свій QR вчителю.</p>
+      <div class="text-center" style="margin-bottom: var(--spacing-sm);">
+        <h2 class="fantasy-title" style="margin: 0 0 4px 0; font-size: 22px;">Магазин нагород</h2>
+        <p class="text-muted" style="margin: 0; font-size: 13px;">Обирай нагороду та покажи свій QR вчителю.</p>
+        ${iconFiligreeDivider()}
+      </div>
       
       <div class="flex flex-col gap-sm">
         ${shop.map(item => {
           const percent = Math.min(100, Math.floor((p.balance / item.price) * 100));
           const canAfford = p.balance >= item.price;
+          const isSweet = item.category === 'sweet';
           
           return `
-            <div class="surface-card">
-              <div class="flex justify-between items-center" style="margin-bottom: var(--spacing-sm);">
+            <div class="parchment-card" style="padding: 14px 16px;">
+              <div class="flex justify-between items-center" style="margin-bottom: 8px;">
                 <div class="flex items-center gap-sm">
-                  <span style="font-size: 28px;">${item.icon || '🎁'}</span>
+                  <!-- Круглий золотий слот нагороди -->
+                  <div style="width: 44px; height: 44px; min-width: 44px; border-radius: 50%; background: radial-gradient(circle, #fff9ee 0%, #ebd7b2 100%); border: 1.5px solid var(--gold-deep); display: flex; align-items: center; justify-content: center; font-size: 24px; box-shadow: inset 0 1px 2px #fff, 0 2px 4px rgba(0,0,0,0.12);">
+                    ${item.icon || '🎁'}
+                  </div>
                   <div>
-                    <div style="font-weight: bold; font-size: 16px;">${item.name}</div>
-                    <div class="text-muted" style="font-size: 12px;">
-                      ${item.category === 'sweet' ? 'Смаколик' : 'Привілей'}
-                    </div>
+                    <div style="font-weight: 700; font-size: 15px; color: var(--text-parchment);">${item.name}</div>
+                    <span class="badge-tag">${isSweet ? 'Смаколик' : 'Привілей'}</span>
                   </div>
                 </div>
+
                 <div style="text-align: right;">
-                  <div style="font-weight: bold; font-size: 18px; color: ${canAfford ? 'var(--ok)' : 'var(--text)'};">
+                  <div style="font-weight: 800; font-size: 17px; font-family: var(--font-fantasy); color: ${canAfford ? 'var(--ok)' : 'var(--text-parchment)'};">
                     ${item.price} ✦
                   </div>
                   ${canAfford ? `
-                    <button class="btn-order primary" data-id="${item.id}" style="padding: 4px 10px; font-size: 12px; min-height: 32px; margin-top: 4px;">
+                    <button class="btn-order btn-genshin-gold" data-id="${item.id}" style="padding: 5px 12px; font-size: 12px; min-height: 34px; margin-top: 4px; border-radius: 12px;">
                       🎁 Замовити
                     </button>
                   ` : `
-                    <span class="text-muted" style="font-size: 11px;">ще ${item.price - p.balance} ✦</span>
+                    <span style="font-size: 11px; color: var(--text-parchment-subtle); display: block; margin-top: 2px;">ще ${item.price - p.balance} ✦</span>
                   `}
                 </div>
               </div>
-              <div style="width: 100%; background: var(--bg); height: 8px; border-radius: 4px; overflow: hidden;">
-                <div style="width: ${percent}%; background: ${canAfford ? 'var(--ok)' : 'var(--star)'}; height: 100%;"></div>
+
+              <!-- Смуга накопичення до нагороди -->
+              <div class="genshin-progress-track">
+                <div class="${canAfford ? 'genshin-progress-fill-cyan' : 'genshin-progress-fill-gold'}" style="width: ${percent}%;"></div>
               </div>
             </div>
           `;
@@ -50,29 +59,33 @@ export function renderShop(root, state) {
       </div>
     </div>
 
-    <!-- Модальне вікно замовлення конкретної нагороди -->
-    <div id="order-modal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.85); z-index:200; align-items:center; justify-content:center; padding:16px;">
-      <div class="surface-card text-center" style="max-width:320px; width:100%; padding:20px;">
-        <div id="order-icon" style="font-size: 38px; margin-bottom: 2px;"></div>
-        <h3 id="order-title" style="margin: 0 0 4px 0; font-size: 18px;"></h3>
-        <div id="order-price" style="font-size: 14px; color: var(--muted); margin-bottom: 8px;"></div>
+    <!-- Модальне вікно замовлення конкретної нагороди у стилі магічної грамоти Genshin -->
+    <div id="order-modal" class="genshin-modal-overlay" style="display:none;">
+      <div class="genshin-modal-content text-center">
+        <!-- Іконка та назва товару -->
+        <div id="order-icon" style="font-size: 42px; margin-bottom: 2px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));"></div>
+        <h3 id="order-title" class="fantasy-title" style="margin: 0 0 4px 0; font-size: 18px; color: var(--text-parchment); text-shadow: none;"></h3>
+        <div id="order-price" style="font-size: 13px; color: var(--text-parchment-muted); margin-bottom: 8px;"></div>
         
-        <!-- Вибір кількості -->
-        <div id="order-qty-row" class="flex justify-center items-center gap-sm" style="margin: 8px 0;">
-          <button id="btn-qty-minus" style="width: 38px; height: 38px; min-height: 38px; border-radius: 50%; font-size: 20px; font-weight: bold; padding: 0; background: var(--bg); border: 1px solid rgba(255,255,255,0.2); cursor: pointer; display: flex; align-items: center; justify-content: center;">−</button>
-          <span id="order-qty-val" style="font-size: 17px; font-weight: bold; min-width: 54px; text-align: center;">1 шт.</span>
-          <button id="btn-qty-plus" style="width: 38px; height: 38px; min-height: 38px; border-radius: 50%; font-size: 20px; font-weight: bold; padding: 0; background: var(--bg); border: 1px solid rgba(255,255,255,0.2); cursor: pointer; display: flex; align-items: center; justify-content: center;">+</button>
+        <!-- Вибір кількості з круглими латунними кнопками -->
+        <div id="order-qty-row" class="flex justify-center items-center gap-md" style="margin: 10px 0;">
+          <button id="btn-qty-minus" style="width: 40px; height: 40px; min-height: 40px; min-width: 40px; border-radius: 50%; font-size: 20px; font-weight: bold; padding: 0; background: var(--surface-parchment-inner); border: 1.5px solid var(--gold-deep); color: var(--text-parchment); cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.15);">−</button>
+          <span id="order-qty-val" style="font-size: 17px; font-weight: 800; min-width: 54px; text-align: center; color: var(--text-parchment); font-family: var(--font-fantasy);">1 шт.</span>
+          <button id="btn-qty-plus" style="width: 40px; height: 40px; min-height: 40px; min-width: 40px; border-radius: 50%; font-size: 20px; font-weight: bold; padding: 0; background: var(--surface-parchment-inner); border: 1.5px solid var(--gold-deep); color: var(--text-parchment); cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.15);">+</button>
         </div>
-        <div id="order-total" style="font-size: 16px; font-weight: bold; color: var(--star); margin-bottom: 12px;"></div>
+        <div id="order-total" style="font-size: 16px; font-weight: 800; color: var(--gold-deep); margin-bottom: 12px; font-family: var(--font-fantasy);"></div>
 
-        <div id="order-qr-container" style="background:white; padding:10px; border-radius:12px; display:inline-block; margin-bottom:10px;"></div>
+        <!-- Контейнер для QR-коду з контрастною білою підкладкою -->
+        <div id="order-qr-container" style="background:#ffffff; padding:10px; border-radius:14px; border:2px solid var(--gold-border); display:inline-block; margin-bottom:10px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);"></div>
         
-        <p class="text-muted" style="font-size: 12px; margin: 0 0 14px 0;">
+        <p style="font-size: 12px; margin: 0 0 14px 0; color: var(--text-parchment-muted); line-height: 1.35;">
           Покажи цей QR вчителю для отримання нагороди.<br>
-          <span style="color: var(--ok); font-weight: 600;">Дійсний лише сьогодні!</span>
+          <strong style="color: #217346;">Дійсний лише сьогодні!</strong>
         </p>
 
-        <button id="btn-close-order" class="primary" style="width: 100%; padding: 10px; font-weight: bold;">Зрозуміло</button>
+        <button id="btn-close-order" class="btn-genshin-gold" style="width: 100%; padding: 12px; font-weight: bold; border-radius: 12px;">
+          Зрозуміло
+        </button>
       </div>
     </div>
   `;

@@ -1,4 +1,11 @@
 import { kyivParts } from '../engine/time.js';
+import { 
+  iconFiligreeDivider, 
+  iconFlame, 
+  iconGrowth, 
+  iconContrib, 
+  iconPrimogem 
+} from '../components/genshin-icons.js';
 
 export function renderQuests(root, state) {
   const p = state.profile;
@@ -13,29 +20,44 @@ export function renderQuests(root, state) {
   
   const weekStars = weekCounters.questStars || 0;
   const weeklyCap = c.questWeeklyCap || 6;
-  const capPercent = Math.min(100, Math.floor((weekStars / weeklyCap) * 100));
+  const monthStars = monthCounters.questStars || 0;
+  const monthlyCap = c.questMonthlyCap || 8;
+  
+  const capPercent = Math.min(100, Math.floor((monthStars / monthlyCap) * 100));
 
   root.innerHTML = `
     <div class="container">
-      <h2>Зоряні квести</h2>
-      <p class="text-muted" style="margin-bottom: var(--spacing-md);">Виконуй завдання та отримуй додаткові зірки щотижня!</p>
+      <div class="text-center" style="margin-bottom: var(--spacing-sm);">
+        <h2 class="fantasy-title" style="margin: 0 0 4px 0; font-size: 22px;">Квести місяця</h2>
+        <p class="text-muted" style="margin: 0; font-size: 13px;">Виконуй завдання та отримуй додаткові зірки!</p>
+        ${iconFiligreeDivider()}
+      </div>
       
-      <div class="surface-card" style="margin-bottom: var(--spacing-md);">
-        <div class="flex justify-between items-center" style="margin-bottom: 6px;">
-          <span style="font-weight: 600;">Зароблено за квести цього тижня:</span>
-          <span style="font-weight: bold; color: var(--star);">${weekStars} / ${weeklyCap} ✦</span>
+      <!-- Загальний лічильник зароблених зірок за квести -->
+      <div class="parchment-card" style="margin-bottom: var(--spacing-md); padding: 14px 16px;">
+        <div class="flex justify-between items-center" style="margin-bottom: 8px;">
+          <div class="flex items-center gap-xs">
+            <span style="display:inline-flex; align-items:center;">
+              ${iconPrimogem(20)}
+            </span>
+            <span style="font-weight: 700; font-size: 14px; color: var(--text-parchment);">Зароблено за квести у цьому місяці:</span>
+          </div>
+          <span style="font-weight: 800; font-size: 16px; font-family: var(--font-fantasy); color: var(--gold-deep);">
+            ${monthStars} / ${monthlyCap} ✦
+          </span>
         </div>
-        <div style="width: 100%; background: var(--bg); height: 8px; border-radius: 4px; overflow: hidden;">
-          <div style="width: ${capPercent}%; background: ${weekStars >= weeklyCap ? 'var(--ok)' : 'var(--accent)'}; height: 100%;"></div>
+        <div class="genshin-progress-track">
+          <div class="${monthStars >= monthlyCap ? 'genshin-progress-fill-cyan' : 'genshin-progress-fill-gold'}" style="width: ${capPercent}%;"></div>
         </div>
       </div>
 
+      <!-- Список завдань у стилі Книги Шукача Пригод -->
       <div class="flex flex-col gap-sm">
         ${quests.map(quest => {
           const isWeekly = quest.period === 'week' || quest.perWeek != null;
           const counters = isWeekly ? weekCounters : monthCounters;
-          const currentStars = isWeekly ? weekStars : (monthCounters.questStars || 0);
-          const currentCap = isWeekly ? weeklyCap : (c.questMonthlyCap || 8);
+          const currentStars = isWeekly ? weekStars : monthStars;
+          const currentCap = isWeekly ? weeklyCap : monthlyCap;
           const limit = isWeekly ? (quest.perWeek ?? quest.perMonth ?? 2) : (quest.perMonth ?? 2);
           const count = counters[quest.id] || 0;
           const isDone = count >= limit || currentStars >= currentCap;
@@ -49,30 +71,47 @@ export function renderQuests(root, state) {
             else desc = 'Спеціальне завдання';
           }
 
+          // Підбір векторної іконки
+          let iconHtml = '';
+          if (quest.type === 'streak') iconHtml = iconFlame(26);
+          else if (quest.type === 'growth') iconHtml = iconGrowth(26);
+          else if (quest.type === 'manual') iconHtml = iconContrib(26);
+          else iconHtml = `<span style="font-size: 24px;">${quest.icon || '🏆'}</span>`;
+
           const periodText = isWeekly ? 'цього тижня' : 'цього місяця';
 
           return `
-            <div class="surface-card">
-              <div class="flex justify-between items-start">
-                <div class="flex items-center gap-sm">
-                  <span style="font-size: 28px;">${quest.icon || '🏆'}</span>
+            <div class="parchment-card" style="padding: 14px 16px;">
+              <div class="flex justify-between items-start" style="gap: 8px;">
+                <div class="flex items-start gap-sm">
+                  <!-- Круглий золотий медальйон з іконкою -->
+                  <div style="width: 44px; height: 44px; min-width: 44px; border-radius: 50%; background: radial-gradient(circle, #f9eed7 0%, #e8d2a7 100%); border: 1.5px solid var(--gold-deep); display: flex; align-items: center; justify-content: center; box-shadow: inset 0 1px 2px rgba(255,255,255,0.8), 0 2px 4px rgba(0,0,0,0.15);">
+                    ${iconHtml}
+                  </div>
                   <div>
-                    <div style="font-weight: bold; font-size: 16px;">${quest.title || quest.name}</div>
-                    <div class="text-muted" style="font-size: 13px;">${desc}</div>
+                    <div style="font-weight: 700; font-size: 15px; color: var(--text-parchment); margin-bottom: 2px;">
+                      ${quest.title || quest.name}
+                    </div>
+                    <div style="font-size: 12px; color: var(--text-parchment-muted); line-height: 1.35; max-width: 250px;">
+                      ${desc}
+                    </div>
                   </div>
                 </div>
-                <div style="font-weight: bold; color: var(--star); white-space: nowrap; font-size: 17px;">
+
+                <!-- Золотий бейдж нагороди +3 ✦ -->
+                <div class="badge-gold" style="white-space: nowrap; font-size: 14px; padding: 4px 10px; border-radius: 14px;">
                   +${quest.reward} ✦
                 </div>
               </div>
 
-              <div style="margin-top: var(--spacing-sm);">
-                <div class="flex justify-between text-muted" style="font-size: 12px; margin-bottom: 4px;">
+              <!-- Прогрес виконання -->
+              <div style="margin-top: 10px;">
+                <div class="flex justify-between" style="font-size: 11px; margin-bottom: 4px; color: var(--text-parchment-subtle);">
                   <span>${isDone ? (count >= limit ? 'Ліміт виконано ✓' : 'Ліміт зірок вичерпано') : `Прогрес ${periodText}:`}</span>
-                  <span style="font-weight: 600;">${count} / ${limit}</span>
+                  <span style="font-weight: 700; color: var(--text-parchment);">${count} / ${limit}</span>
                 </div>
-                <div style="width: 100%; background: var(--bg); height: 6px; border-radius: 3px; overflow: hidden;">
-                  <div style="width: ${percent}%; background: ${isDone ? 'var(--ok)' : 'var(--accent)'}; height: 100%;"></div>
+                <div class="genshin-progress-track">
+                  <div class="${isDone ? 'genshin-progress-fill-cyan' : 'genshin-progress-fill-gold'}" style="width: ${percent}%;"></div>
                 </div>
               </div>
             </div>

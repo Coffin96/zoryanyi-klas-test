@@ -4,6 +4,13 @@ import { renderQr } from './qr.js';
 import { renderShop } from './shop.js';
 import { renderQuests } from './quests.js';
 import { renderHistory } from './history.js';
+import { 
+  iconPrimogem, 
+  iconMoraPouch, 
+  iconCompassQuest, 
+  iconChronicleScroll, 
+  iconArcaneQr 
+} from '../components/genshin-icons.js';
 
 export const state = {
   uuid: null,
@@ -30,7 +37,7 @@ export function initStudentApp() {
     u = u.toLowerCase();
     try {
       localStorage.setItem('zk_student_uuid', u);
-      // Clean up URL so it's clean and cannot be accidentally peeked/shared
+      // Clean up URL so it's clean and cannot be peeked/shared
       window.history.replaceState({}, document.title, window.location.pathname);
     } catch (e) {
       console.warn("Storage or history error:", e);
@@ -68,7 +75,7 @@ export function initStudentApp() {
         if (state.profile && p.balance !== state.profile.balance) {
           const delta = p.balance - state.profile.balance;
           if (delta > 0) {
-            showStudentToast(`+${delta} ✦`);
+            showStudentToast(`+${delta} ✦ Зараховано!`);
           } else {
             showStudentToast(`${delta} ✦ (Залишок: ${p.balance} ✦)`);
           }
@@ -134,14 +141,16 @@ function renderApp() {
   if (!state.uuid) {
     root.innerHTML = `
       <div class="container flex flex-col items-center justify-center text-center" style="min-height: 90vh;">
-        <div style="font-size: 56px; margin-bottom: var(--spacing-sm); color: var(--star);">✦</div>
-        <h1 class="text-xl" style="margin-bottom: var(--spacing-sm);">Зоряний клас</h1>
-        <p class="text-muted" style="max-width: 320px; margin-bottom: var(--spacing-lg);">
+        <div style="margin-bottom: var(--spacing-sm); filter: drop-shadow(0 0 16px var(--gold-glow));">
+          ${iconPrimogem(64)}
+        </div>
+        <h1 class="text-xl fantasy-title" style="margin-bottom: var(--spacing-xs); font-size: 28px;">Зоряний клас</h1>
+        <p class="text-muted" style="max-width: 320px; margin-bottom: var(--spacing-lg); font-size: 15px;">
           Відскануй свій персональний QR-код або перейди за посиланням від вчителя, щоб відкрити свій зоряний профіль.
         </p>
-        <div class="surface-card text-left" style="font-size: 13px; max-width: 320px;">
-          <p style="margin: 0;" class="text-muted">
-            Підказка: вчитель може згенерувати QR-картку в розділі <strong>«Адміністрування → Друк карток»</strong>.
+        <div class="surface-card text-left" style="font-size: 13px; max-width: 340px;">
+          <p style="margin: 0; color: var(--gold-light);">
+            ✨ Підказка: вчитель може згенерувати твою QR-картку в розділі <strong>«Адміністрування → Друк карток»</strong>.
           </p>
         </div>
       </div>
@@ -153,8 +162,8 @@ function renderApp() {
   if (state.error && !state.profile) {
     root.innerHTML = `
       <div class="container flex flex-col items-center justify-center text-center" style="min-height: 90vh;">
-        <div style="font-size: 48px; margin-bottom: var(--spacing-sm); color: var(--danger);">⚠️</div>
-        <h2 class="text-lg" style="margin-bottom: var(--spacing-sm);">Помилка завантаження</h2>
+        <div style="font-size: 48px; margin-bottom: var(--spacing-sm);">⚠️</div>
+        <h2 class="text-lg fantasy-title" style="margin-bottom: var(--spacing-sm);">Помилка завантаження</h2>
         <p class="error-text" style="margin-bottom: var(--spacing-lg); max-width: 340px;">${state.error}</p>
         <div class="flex gap-sm">
           <button onclick="location.reload()" class="primary">Спробувати знову</button>
@@ -171,52 +180,47 @@ function renderApp() {
   if (!state.profile || !state.config) {
     root.innerHTML = `
       <div class="container flex flex-col items-center justify-center text-center" style="min-height: 90vh;">
-        <div style="font-size: 48px; margin-bottom: var(--spacing-sm); color: var(--star);">✦</div>
-        <h2 class="text-lg" style="margin-bottom: var(--spacing-sm);">Завантаження профілю...</h2>
+        <div style="margin-bottom: var(--spacing-sm); filter: drop-shadow(0 0 20px var(--gold-glow));">
+          ${iconPrimogem(56)}
+        </div>
+        <h2 class="text-lg fantasy-title" style="margin-bottom: var(--spacing-xs);">Завантаження профілю...</h2>
         <p class="text-muted">${state.offline ? 'Немає зв\'язку з інтернетом' : 'Отримуємо дані із зоряної бази...'}</p>
       </div>
     `;
     return;
   }
 
-  // Case 4: Loaded successfully - Main student view
+  // Case 4: Loaded successfully - Main student view with Genshin bottom navigation
   root.innerHTML = `
-    ${state.offline ? '<div style="background:var(--muted); color:white; text-align:center; padding:4px; font-size:12px;">Немає зв\'язку, показано останній збережений баланс</div>' : ''}
-    <div id="view-container" style="padding-bottom: 75px;"></div>
+    ${state.offline ? '<div style="background:rgba(214,181,115,0.25); border-bottom:1px solid var(--gold-border); color:var(--gold-light); text-align:center; padding:5px; font-size:12px; font-weight:600;">Немає зв\'язку, показано збережені дані</div>' : ''}
+    <div id="view-container" style="padding-bottom: 80px;"></div>
     
-    <nav style="position:fixed; bottom:0; left:0; right:0; background:var(--surface); display:flex; justify-content:space-around; padding:8px 0; border-top: 1px solid rgba(255,255,255,0.08); z-index:100; box-shadow: 0 -4px 12px rgba(0,0,0,0.2);">
-      <button class="nav-btn ${state.view === 'home' ? 'active' : ''}" data-view="home" style="flex:1; background:transparent; border:none; display:flex; flex-direction:column; align-items:center; min-height:auto; cursor:pointer;">
-        <span style="font-size:20px; line-height: 1;">✦</span>
-        <span style="font-size:11px; margin-top: 4px;">Мої ✦</span>
+    <nav class="genshin-bottom-nav" aria-label="Головна навігація">
+      <button class="genshin-nav-btn ${state.view === 'home' ? 'active' : ''}" data-view="home">
+        <span class="nav-icon">${iconPrimogem(22)}</span>
+        <span class="nav-label">Мої</span>
       </button>
-      <button class="nav-btn ${state.view === 'qr' ? 'active' : ''}" data-view="qr" style="flex:1; background:transparent; border:none; display:flex; flex-direction:column; align-items:center; min-height:auto; cursor:pointer;">
-        <span style="font-size:20px; line-height: 1;">📱</span>
-        <span style="font-size:11px; margin-top: 4px;">Мій QR</span>
+      <button class="genshin-nav-btn ${state.view === 'qr' ? 'active' : ''}" data-view="qr">
+        <span class="nav-icon">${iconArcaneQr(22)}</span>
+        <span class="nav-label">Мій QR</span>
       </button>
-      <button class="nav-btn ${state.view === 'shop' ? 'active' : ''}" data-view="shop" style="flex:1; background:transparent; border:none; display:flex; flex-direction:column; align-items:center; min-height:auto; cursor:pointer;">
-        <span style="font-size:20px; line-height: 1;">🛒</span>
-        <span style="font-size:11px; margin-top: 4px;">Магазин</span>
+      <button class="genshin-nav-btn ${state.view === 'shop' ? 'active' : ''}" data-view="shop">
+        <span class="nav-icon">${iconMoraPouch(22)}</span>
+        <span class="nav-label">Магазин</span>
       </button>
-      <button class="nav-btn ${state.view === 'quests' ? 'active' : ''}" data-view="quests" style="flex:1; background:transparent; border:none; display:flex; flex-direction:column; align-items:center; min-height:auto; cursor:pointer;">
-        <span style="font-size:20px; line-height: 1;">🏆</span>
-        <span style="font-size:11px; margin-top: 4px;">Квести</span>
+      <button class="genshin-nav-btn ${state.view === 'quests' ? 'active' : ''}" data-view="quests">
+        <span class="nav-icon">${iconCompassQuest(22)}</span>
+        <span class="nav-label">Квести</span>
       </button>
-      <button class="nav-btn ${state.view === 'history' ? 'active' : ''}" data-view="history" style="flex:1; background:transparent; border:none; display:flex; flex-direction:column; align-items:center; min-height:auto; cursor:pointer;">
-        <span style="font-size:20px; line-height: 1;">📜</span>
-        <span style="font-size:11px; margin-top: 4px;">Історія</span>
+      <button class="genshin-nav-btn ${state.view === 'history' ? 'active' : ''}" data-view="history">
+        <span class="nav-icon">${iconChronicleScroll(22)}</span>
+        <span class="nav-label">Історія</span>
       </button>
     </nav>
   `;
 
-  document.querySelectorAll('.nav-btn').forEach(btn => {
+  document.querySelectorAll('.genshin-nav-btn').forEach(btn => {
     btn.addEventListener('click', () => navigate(btn.dataset.view));
-    if (btn.classList.contains('active')) {
-      btn.style.color = 'var(--star)';
-      btn.style.fontWeight = 'bold';
-    } else {
-      btn.style.color = 'var(--muted)';
-      btn.style.fontWeight = 'normal';
-    }
   });
 
   const viewContainer = document.getElementById('view-container');

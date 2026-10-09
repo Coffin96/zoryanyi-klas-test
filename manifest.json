@@ -3,8 +3,8 @@
   "short_name": "Зоряний клас",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#0e1230",
-  "theme_color": "#0e1230",
+  "background_color": "#0b0f20",
+  "theme_color": "#0b0f20",
   "orientation": "portrait",
   "icons": [
     {

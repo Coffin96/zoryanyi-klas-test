@@ -8,19 +8,78 @@
   overflow: hidden;
 }
 
-/* Common Layouts */
-.container {
-  max-width: 600px;
-  margin: 0 auto;
-  padding: var(--spacing-md);
+/* Background Atmosphere Pattern */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-image: 
+    radial-gradient(1px 1px at 20px 30px, #ffffff, rgba(0,0,0,0)),
+    radial-gradient(1px 1px at 40px 70px, rgba(255,240,194,0.8), rgba(0,0,0,0)),
+    radial-gradient(1.5px 1.5px at 90px 40px, #ffffff, rgba(0,0,0,0)),
+    radial-gradient(1px 1px at 160px 120px, rgba(175,225,255,0.7), rgba(0,0,0,0)),
+    radial-gradient(1.5px 1.5px at 230px 180px, rgba(255,240,194,0.9), rgba(0,0,0,0)),
+    radial-gradient(1px 1px at 290px 80px, #ffffff, rgba(0,0,0,0)),
+    radial-gradient(1px 1px at 340px 220px, rgba(175,225,255,0.6), rgba(0,0,0,0));
+  background-repeat: repeat;
+  background-size: 360px 360px;
+  opacity: 0.35;
+  pointer-events: none;
+  z-index: 0;
 }
 
+/* Common Layouts */
+.container {
+  max-width: 540px;
+  margin: 0 auto;
+  padding: var(--spacing-md);
+  position: relative;
+  z-index: 1;
+}
+
+/* 1. Astral Surface Card (Deep Sapphire with Gold Trim) */
 .surface-card {
-  background-color: var(--surface);
+  background: rgba(22, 30, 58, 0.88);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--surface-astral-border);
   border-radius: var(--radius-lg);
   padding: var(--spacing-lg);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  color: var(--text);
+  position: relative;
+  overflow: hidden;
 }
+
+/* 2. Genshin Warm Parchment Card (Adventurer Handbook / Shop item / Quests) */
+.parchment-card {
+  background: var(--surface-parchment);
+  color: var(--text-parchment);
+  border: 1.5px solid var(--surface-parchment-border);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-md);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.38), inset 0 0 0 1px rgba(255, 255, 255, 0.85);
+  position: relative;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.parchment-card:hover {
+  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.48), 0 0 10px rgba(214, 181, 115, 0.3);
+}
+
+/* Subtle corner diamond notches on parchment cards */
+.parchment-card::before,
+.parchment-card::after {
+  content: "";
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  background: var(--gold-deep);
+  transform: rotate(45deg);
+  opacity: 0.6;
+}
+.parchment-card::before { top: 6px; left: 6px; }
+.parchment-card::after { top: 6px; right: 6px; }
 
 /* Forms */
 .form-group {
@@ -32,34 +91,46 @@
 
 .form-group label {
   font-weight: 600;
-  color: var(--muted);
+  color: var(--gold-light);
+  font-family: var(--font-fantasy);
+  letter-spacing: 0.03em;
+  font-size: 14px;
 }
 
 .error-text {
-  color: var(--danger);
+  color: #ff7575;
   font-size: 14px;
   margin-top: var(--spacing-xs);
+  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
 }
 
-/* Top bar */
+/* Top bar with Genshin Header Style */
 .top-bar {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding-bottom: var(--spacing-md);
-  border-bottom: 1px solid var(--surface);
+  border-bottom: 1px solid rgba(214, 181, 115, 0.25);
   margin-bottom: var(--spacing-md);
 }
 
-/* Scanner */
+.top-bar h2 {
+  font-size: 20px;
+  margin: 0;
+  color: #fff;
+  text-shadow: 0 2px 6px rgba(0,0,0,0.6);
+}
+
+/* Genshin Ornate Scanner Viewfinder */
 .scanner-container {
   position: relative;
   width: 100%;
   aspect-ratio: 4/3;
-  background-color: #000;
+  background-color: #070a14;
   border-radius: var(--radius-lg);
   overflow: hidden;
   margin-bottom: var(--spacing-md);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(229, 195, 120, 0.3);
 }
 
 .scanner-video {
@@ -71,13 +142,34 @@
 .scanner-overlay {
   position: absolute;
   top: 0; left: 0; right: 0; bottom: 0;
-  border: 2px dashed var(--accent);
-  margin: 10%;
-  border-radius: var(--radius-md);
+  margin: 12%;
   pointer-events: none;
+  border: 1px dashed rgba(229, 195, 120, 0.4);
+  border-radius: var(--radius-md);
 }
 
-/* Grades keyboard */
+/* 4-corner gold brackets for targeting reticle */
+.scanner-overlay::before,
+.scanner-overlay::after {
+  content: "";
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  border-color: var(--gold-primary);
+  border-style: solid;
+}
+.scanner-overlay::before {
+  top: -2px; left: -2px;
+  border-width: 3px 0 0 3px;
+  border-top-left-radius: 8px;
+}
+.scanner-overlay::after {
+  bottom: -2px; right: -2px;
+  border-width: 0 3px 3px 0;
+  border-bottom-right-radius: 8px;
+}
+
+/* Grades keyboard - Genshin Talent / Constellation Tile Grid */
 .grades-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -87,14 +179,30 @@
 
 .grade-btn {
   font-size: 20px;
+  font-weight: 700;
+  font-family: var(--font-fantasy);
+  background: rgba(18, 25, 50, 0.9);
+  border: 1.5px solid rgba(214, 181, 115, 0.45);
+  border-radius: var(--radius-md);
+  color: var(--gold-light);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  transition: all 0.15s ease;
+}
+
+.grade-btn:hover {
+  border-color: var(--gold-primary);
+  box-shadow: 0 0 8px var(--gold-glow);
 }
 
 .grade-btn.selected {
-  background-color: var(--accent);
-  color: white;
+  background: var(--gold-btn-gradient);
+  color: #2b1f09;
+  border-color: #fff;
+  box-shadow: 0 0 14px var(--gold-glow), 0 2px 6px rgba(0,0,0,0.4);
+  transform: translateY(-1px);
 }
 
-/* Shop grid */
+/* Shop and Quests Grid */
 .shop-grid {
   display: grid;
   grid-template-columns: 1fr;
@@ -102,31 +210,155 @@
   margin-bottom: var(--spacing-md);
 }
 
-.shop-item {
-  display: flex;
-  justify-content: space-between;
+/* Genshin Progress Bar (Brass Trough with Cyan/Gold Glow) */
+.genshin-progress-track {
+  width: 100%;
+  height: 9px;
+  background: rgba(30, 24, 18, 0.15);
+  border-radius: 5px;
+  border: 1px solid rgba(180, 145, 80, 0.35);
+  overflow: hidden;
+  position: relative;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.25);
+}
+
+.genshin-progress-track.dark-track {
+  background: rgba(8, 12, 26, 0.7);
+  border: 1px solid rgba(214, 181, 115, 0.3);
+}
+
+.genshin-progress-fill-cyan {
+  height: 100%;
+  background: var(--cyan-gradient);
+  border-radius: 4px;
+  box-shadow: 0 0 8px var(--cyan-glow);
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.genshin-progress-fill-gold {
+  height: 100%;
+  background: var(--gold-gradient);
+  border-radius: 4px;
+  box-shadow: 0 0 8px var(--gold-glow);
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Genshin Status Badges */
+.badge-gold {
+  display: inline-flex;
   align-items: center;
-  background: var(--bg);
-  padding: var(--spacing-md);
-  border-radius: var(--radius-md);
+  gap: 3px;
+  font-weight: 700;
+  font-family: var(--font-fantasy);
+  color: var(--gold-deep);
+  background: rgba(229, 195, 120, 0.18);
+  border: 1px solid rgba(214, 181, 115, 0.6);
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 13px;
 }
 
-.shop-item.disabled {
-  opacity: 0.5;
+.badge-tag {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-parchment-muted);
+  background: rgba(160, 140, 110, 0.15);
+  border: 1px solid rgba(160, 140, 110, 0.3);
+  padding: 2px 7px;
+  border-radius: 8px;
+  letter-spacing: 0.02em;
 }
 
-/* Receipt Toast */
+/* Genshin Bottom Navigation Bar */
+.genshin-bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(13, 17, 36, 0.94);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  display: flex;
+  justify-content: space-around;
+  padding: 6px 0 max(6px, env(safe-area-inset-bottom));
+  border-top: 1px solid rgba(214, 181, 115, 0.4);
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5);
+  z-index: 100;
+}
+
+.genshin-nav-btn {
+  flex: 1;
+  background: transparent;
+  border: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 52px;
+  padding: 4px 0;
+  color: var(--muted);
+  cursor: pointer;
+  position: relative;
+  transition: color 0.15s ease, transform 0.15s ease;
+}
+
+.genshin-nav-btn:hover {
+  color: var(--gold-light);
+}
+
+.genshin-nav-btn.active {
+  color: var(--gold-primary);
+  font-weight: 700;
+}
+
+.genshin-nav-btn.active::after {
+  content: "";
+  position: absolute;
+  bottom: 2px;
+  width: 18px;
+  height: 2px;
+  background: var(--gold-gradient);
+  border-radius: 2px;
+  box-shadow: 0 0 6px var(--gold-glow);
+}
+
+.genshin-nav-btn .nav-icon {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.15s ease;
+}
+
+.genshin-nav-btn.active .nav-icon {
+  transform: translateY(-2px);
+  filter: drop-shadow(0 0 6px rgba(229, 195, 120, 0.6));
+}
+
+.genshin-nav-btn .nav-label {
+  font-size: 11px;
+  margin-top: 3px;
+  letter-spacing: 0.02em;
+}
+
+/* Receipt Toast / Notification in Genshin Announcement Style */
 .receipt-toast {
   position: fixed;
-  bottom: 80px;
+  bottom: 84px;
   left: 50%;
   transform: translateX(-50%) translateY(20px);
-  background-color: var(--ok);
+  background: rgba(18, 25, 52, 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   color: #fff;
-  padding: 14px 20px;
-  border-radius: 24px;
+  border: 1.5px solid var(--gold-primary);
+  box-shadow: 0 6px 24px rgba(0,0,0,0.55), 0 0 14px var(--gold-glow);
+  padding: 12px 22px;
+  border-radius: 26px;
   font-weight: bold;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+  font-size: 15px;
   transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), visibility 0.3s;
   z-index: 1000;
   opacity: 0;
@@ -141,4 +373,30 @@
   opacity: 1;
   visibility: visible;
   pointer-events: auto;
+}
+
+/* Modal Windows in Genshin Ornate Quest Style */
+.genshin-modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(6, 9, 20, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.genshin-modal-content {
+  background: var(--surface-parchment);
+  color: var(--text-parchment);
+  border: 2px solid var(--gold-deep);
+  border-radius: var(--radius-xl);
+  box-shadow: 0 10px 32px rgba(0,0,0,0.7), inset 0 0 0 1px rgba(255,255,255,0.9);
+  padding: 24px 20px;
+  max-width: 340px;
+  width: 100%;
+  position: relative;
 }

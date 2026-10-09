@@ -2,8 +2,8 @@ import { navigate, appState, showToast } from './app.js';
 import { parseQR } from '../engine/qr-protocol.js';
 import { getProfile } from '../data/repo.js';
 import { texts } from '../i18n/uk.js';
-import { logoutTeacher } from '../data/firebase.js';
 import { kyivParts } from '../engine/time.js';
+import { iconFiligreeDivider } from '../components/genshin-icons.js';
 
 let stream = null;
 let scanInterval = null;
@@ -11,9 +11,11 @@ let scanInterval = null;
 export function renderScanner(root) {
   root.innerHTML = `
     <div class="container">
-      <div class="top-bar">
-        <h2 style="margin:0;">Сканер QR-кодів</h2>
-        <button id="btn-to-students-top" class="primary" style="padding: 6px 12px; font-size: 13px;">👥 Учні</button>
+      <div class="top-bar flex justify-between items-center">
+        <h2 class="fantasy-title" style="margin:0; font-size: 20px;">Сканер QR-кодів</h2>
+        <button id="btn-to-students-top" class="btn-genshin-gold" style="padding: 6px 14px; font-size: 13px; min-height: 36px; border-radius: 12px;">
+          👥 Учні
+        </button>
       </div>
 
       <div class="scanner-container">
@@ -21,11 +23,17 @@ export function renderScanner(root) {
         <div class="scanner-overlay"></div>
       </div>
       
-      <p id="scanner-msg" class="text-center text-muted" style="margin: 8px 0 16px 0;">Наведи камеру на QR-картку або телефон учня</p>
+      <p id="scanner-msg" class="text-center" style="margin: 8px 0 16px 0; font-size: 14px; color: var(--gold-light);">
+        Наведи камеру на QR-картку або екран учня
+      </p>
       
       <div class="flex flex-col gap-sm">
-        <button id="btn-list" class="primary" style="width: 100%; padding: 12px;">👥 Вибрати учня зі списку</button>
-        <button id="btn-quick-create" style="width: 100%; padding: 12px; background: var(--surface); border: 1px solid rgba(255,255,255,0.1);">➕ Створити учня</button>
+        <button id="btn-list" class="btn-genshin-gold" style="width: 100%; padding: 13px; font-size: 15px; border-radius: 14px;">
+          👥 Вибрати учня зі списку
+        </button>
+        <button id="btn-quick-create" class="surface-card" style="width: 100%; padding: 13px; font-size: 15px; border-radius: 14px; border: 1px solid var(--gold-border); text-align: center; justify-content: center; color: var(--gold-light); cursor: pointer;">
+          ➕ Створити учня в класі
+        </button>
       </div>
     </div>
   `;
@@ -124,11 +132,11 @@ async function handleScan(data) {
     const msgEl = document.getElementById('scanner-msg');
     if (msgEl) {
       msgEl.textContent = err.message === 'expired-order' ? 'Замовлення прострочено (створено не сьогодні)' : texts.scan.unknown;
-      msgEl.style.color = 'var(--danger)';
+      msgEl.style.color = '#ff7575';
       setTimeout(() => {
         if (msgEl) {
-          msgEl.textContent = 'Наведи на QR учня';
-          msgEl.style.color = 'var(--muted)';
+          msgEl.textContent = 'Наведи камеру на QR учня';
+          msgEl.style.color = 'var(--gold-light)';
         }
       }, 3000);
     }

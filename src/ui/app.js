@@ -8,6 +8,7 @@ import { renderAdmin } from './admin.js';
 import { doc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { db } from '../data/firebase.js';
 import { defaultConfig } from '../data/default-config.js';
+import { iconPrimogem, iconFiligreeDivider } from '../components/genshin-icons.js';
 
 export const appState = {
   user: null,
@@ -67,9 +68,11 @@ export function showToast(msg, action = null) {
   if (action) {
     const btn = document.createElement('button');
     btn.textContent = action.text;
-    btn.style.padding = '4px 8px';
-    btn.style.minHeight = 'auto';
-    btn.style.backgroundColor = 'rgba(255,255,255,0.2)';
+    btn.className = 'btn-genshin-gold';
+    btn.style.padding = '4px 10px';
+    btn.style.minHeight = '32px';
+    btn.style.fontSize = '12px';
+    btn.style.borderRadius = '10px';
     btn.addEventListener('click', () => {
       action.handler();
       toast.classList.remove('show');
@@ -99,12 +102,15 @@ function render() {
   if (!appState.config) {
     root.innerHTML = `
       <div class="container text-center flex flex-col items-center gap-md" style="padding-top: var(--spacing-xl);">
-        <h2>Завантаження конфігурації...</h2>
-        <p class="text-muted">Якщо це перший запуск, ініціалізуйте початкові налаштування в базі даних:</p>
-        <button id="btn-seed-config" class="primary">Завантажити початкову конфігурацію</button>
+        <div style="filter: drop-shadow(0 0 16px var(--gold-glow));">
+          ${iconPrimogem(56)}
+        </div>
+        <h2 class="fantasy-title" style="margin: 0; font-size: 24px;">Кабінет вчителя</h2>
+        <p class="text-muted" style="max-width: 380px;">Якщо це перший запуск, ініціалізуйте початкову конфігурацію в базі даних:</p>
+        <button id="btn-seed-config" class="btn-genshin-gold" style="padding: 12px 24px;">Завантажити початкову конфігурацію</button>
         <div class="surface-card text-left" style="font-size: 13px; margin-top: var(--spacing-md); max-width: 450px;">
-          <strong>Ваш UID вчителя:</strong><br>
-          <code style="word-break: break-all; color: var(--accent);">${appState.user?.uid || ''}</code>
+          <strong style="color: var(--gold-light);">Ваш UID вчителя:</strong><br>
+          <code style="word-break: break-all; color: var(--cyan-accent); font-size: 12px;">${appState.user?.uid || ''}</code>
           <p style="margin-top: 8px; margin-bottom: 0;" class="text-muted">
             У Firebase Console → Firestore Database створіть колекцію <code>admins</code> із документом <code>${appState.user?.uid || ''}</code>, щоб надати собі права вчителя.
           </p>
@@ -131,39 +137,32 @@ function render() {
     return;
   }
 
-  // 3. Main teacher layout with fixed bottom navigation
+  // 3. Main teacher layout with fixed bottom navigation in Genshin style
   root.innerHTML = `
-    <div id="teacher-view-container" style="padding-bottom: 75px;"></div>
+    <div id="teacher-view-container" style="padding-bottom: 80px;"></div>
     
-    <nav style="position:fixed; bottom:0; left:0; right:0; background:var(--surface); display:flex; justify-content:space-around; padding:8px 0; border-top: 1px solid rgba(255,255,255,0.08); z-index:100; box-shadow: 0 -4px 12px rgba(0,0,0,0.2);">
-      <button class="nav-teacher-btn ${appState.view === 'scanner' ? 'active' : ''}" data-view="scanner" style="flex:1; background:transparent; border:none; display:flex; flex-direction:column; align-items:center; cursor:pointer;">
-        <span style="font-size:20px; line-height: 1;">📷</span>
-        <span style="font-size:11px; margin-top: 4px;">Сканер</span>
+    <nav class="genshin-bottom-nav" aria-label="Вчительська навігація">
+      <button class="genshin-nav-btn ${appState.view === 'scanner' ? 'active' : ''}" data-view="scanner">
+        <span class="nav-icon" style="font-size: 20px;">📷</span>
+        <span class="nav-label">Сканер</span>
       </button>
-      <button class="nav-teacher-btn ${appState.view === 'student-list' ? 'active' : ''}" data-view="student-list" style="flex:1; background:transparent; border:none; display:flex; flex-direction:column; align-items:center; cursor:pointer;">
-        <span style="font-size:20px; line-height: 1;">👥</span>
-        <span style="font-size:11px; margin-top: 4px;">Учні</span>
+      <button class="genshin-nav-btn ${appState.view === 'student-list' ? 'active' : ''}" data-view="student-list">
+        <span class="nav-icon" style="font-size: 20px;">👥</span>
+        <span class="nav-label">Учні</span>
       </button>
-      <button class="nav-teacher-btn ${appState.view === 'admin' ? 'active' : ''}" data-view="admin" style="flex:1; background:transparent; border:none; display:flex; flex-direction:column; align-items:center; cursor:pointer;">
-        <span style="font-size:20px; line-height: 1;">⚙️</span>
-        <span style="font-size:11px; margin-top: 4px;">Адмінка</span>
+      <button class="genshin-nav-btn ${appState.view === 'admin' ? 'active' : ''}" data-view="admin">
+        <span class="nav-icon" style="font-size: 20px;">⚙️</span>
+        <span class="nav-label">Адмінка</span>
       </button>
-      <button id="btn-global-logout" style="flex:1; background:transparent; border:none; display:flex; flex-direction:column; align-items:center; cursor:pointer; color: var(--danger);">
-        <span style="font-size:20px; line-height: 1;">🚪</span>
-        <span style="font-size:11px; margin-top: 4px;">Вийти</span>
+      <button id="btn-global-logout" class="genshin-nav-btn" style="color: #ff8585;">
+        <span class="nav-icon" style="font-size: 20px;">🚪</span>
+        <span class="nav-label">Вийти</span>
       </button>
     </nav>
   `;
 
-  document.querySelectorAll('.nav-teacher-btn').forEach(btn => {
+  document.querySelectorAll('.genshin-nav-btn[data-view]').forEach(btn => {
     btn.addEventListener('click', () => navigate(btn.dataset.view));
-    if (btn.classList.contains('active')) {
-      btn.style.color = 'var(--star)';
-      btn.style.fontWeight = 'bold';
-    } else {
-      btn.style.color = 'var(--muted)';
-      btn.style.fontWeight = 'normal';
-    }
   });
 
   const logoutBtn = document.getElementById('btn-global-logout');

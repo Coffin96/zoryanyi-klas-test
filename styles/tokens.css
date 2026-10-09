@@ -1,36 +1,73 @@
 :root {
-  --bg: #0e1230;
-  --surface: #181d45;
-  --text: #f2f4ff;
-  --muted: #a9b0e0;
-  --star: #ffc53d;
-  --accent: #8b7bff;
-  --ok: #3ddc97;
-  --danger: #ff6b6b;
+  /* Genshin Palette - Celestial Night & Stars */
+  --bg-space: #0b0f20;
+  --bg-celestial: #0f152d;
+  --bg-gradient: radial-gradient(circle at 50% -20%, #202b54 0%, #0d1226 55%, #080b18 100%);
   
+  /* Backward-compatible base tokens */
+  --bg: #0b0f20;
+  --surface: #171f3a;
+  --text: #f5f2e9;
+  --muted: #9ba4c4;
+  --star: #ffc947;
+  --accent: #e5c378;
+  --ok: #3ecf92;
+  --danger: #cf4343;
+
+  /* Genshin Warm Parchment Tokens (Adventurer Handbook / Shop Cards) */
+  --surface-parchment: #fcf9f2;
+  --surface-parchment-inner: #f4ede1;
+  --surface-parchment-border: #d6b573;
+  --surface-parchment-border-light: #f5e4bb;
+  --text-parchment: #2d241c;
+  --text-parchment-muted: #736555;
+  --text-parchment-subtle: #988775;
+
+  /* Genshin Astral Dark Surface (Banners, Modals, System bars) */
+  --surface-astral: #151d38;
+  --surface-astral-card: #1c274b;
+  --surface-astral-border: rgba(229, 195, 120, 0.35);
+  
+  /* Genshin Gold & Amber Accents */
+  --gold-primary: #e5c378;
+  --gold-light: #fce8b8;
+  --gold-deep: #b58d3c;
+  --gold-border: #d4b26f;
+  --gold-glow: rgba(229, 195, 120, 0.45);
+  --gold-gradient: linear-gradient(135deg, #f7dfa5 0%, #e0bd72 50%, #c49942 100%);
+  --gold-btn-gradient: linear-gradient(180deg, #fae5b5 0%, #e0bc6e 60%, #c59940 100%);
+  
+  /* Anemo Cyan / Celestial Magic */
+  --cyan-accent: #48d1c9;
+  --cyan-glow: rgba(72, 209, 201, 0.4);
+  --cyan-gradient: linear-gradient(90deg, #48d1c9 0%, #5ce1e6 100%);
+  
+  /* Crimson Banner / Exit Action */
+  --danger-crimson: #992929;
+  --danger-crimson-hover: #b83333;
+  --danger-crimson-gradient: linear-gradient(180deg, #b83333 0%, #8f2222 100%);
+
+  /* Spacing */
   --spacing-xs: 4px;
   --spacing-sm: 8px;
   --spacing-md: 16px;
   --spacing-lg: 24px;
   --spacing-xl: 32px;
 
+  /* Typography */
+  --font-fantasy: 'Cinzel', 'Marcellus', 'Trajan Pro', 'Palatino Linotype', 'Book Antiqua', Palatino, Georgia, serif;
   --font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  
+  /* Radii & Shadows */
+  --radius-xs: 4px;
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 16px;
-}
-
-@media (prefers-color-scheme: light) {
-  :root {
-    --bg: #f6f7ff;
-    --surface: #ffffff;
-    --text: #171a3a;
-    --muted: #5a608f;
-    --star: #d99100;
-    --accent: #5b48e8;
-    --ok: #138a5a;
-    --danger: #c43838;
-  }
+  --radius-xl: 22px;
+  
+  --shadow-card: 0 4px 18px rgba(0, 0, 0, 0.35);
+  --shadow-parchment: 0 4px 16px rgba(0, 0, 0, 0.28), inset 0 0 0 1px rgba(255, 255, 255, 0.7);
+  --shadow-gold-glow: 0 0 14px var(--gold-glow);
 }
 
 * {
@@ -40,10 +77,22 @@
 body {
   margin: 0;
   font-family: var(--font-family);
-  background-color: var(--bg);
+  background-color: var(--bg-space);
+  background-image: var(--bg-gradient);
+  background-attachment: fixed;
   color: var(--text);
   line-height: 1.5;
   font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+
+/* Headings with Genshin Fantasy Flair */
+h1, h2, h3, .fantasy-title {
+  font-family: var(--font-fantasy);
+  letter-spacing: 0.03em;
+  color: #fff;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 button {
@@ -62,63 +111,94 @@ button {
   gap: var(--spacing-sm);
   background-color: var(--surface);
   color: var(--text);
-  transition: opacity 0.2s, transform 0.1s;
+  transition: opacity 0.2s, transform 0.12s, box-shadow 0.2s;
+  user-select: none;
 }
 
 @media (prefers-reduced-motion) {
-  button {
-    transition: none;
+  button, * {
+    transition: none !important;
+    animation: none !important;
   }
 }
 
 button:active {
-  transform: scale(0.98);
+  transform: scale(0.97);
 }
 
-button.primary {
-  background-color: var(--accent);
-  color: white;
+/* Primary Button in Genshin Gold Ingot Style */
+button.primary, .btn-genshin-gold {
+  background: var(--gold-btn-gradient);
+  color: #2b1f09;
+  font-weight: 700;
+  border: 1px solid var(--gold-light);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
-button.danger {
-  background-color: var(--danger);
-  color: white;
+button.primary:hover, .btn-genshin-gold:hover {
+  filter: brightness(1.06);
+}
+
+/* Danger / Exit button in Genshin Crimson ribbon style */
+button.danger, .btn-genshin-crimson {
+  background: var(--danger-crimson-gradient);
+  color: #fff;
+  border: 1px solid rgba(255, 200, 200, 0.4);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+  font-weight: 600;
+}
+
+button.danger:hover, .btn-genshin-crimson:hover {
+  filter: brightness(1.1);
 }
 
 button:disabled {
-  opacity: 0.5;
+  opacity: 0.45;
   cursor: not-allowed;
   transform: none;
+  filter: grayscale(0.5);
 }
 
-input {
+input, textarea, select {
   font-family: var(--font-family);
   font-size: 16px;
-  padding: 12px;
-  border: 1px solid var(--muted);
+  padding: 12px 14px;
+  border: 1px solid rgba(214, 181, 115, 0.5);
   border-radius: var(--radius-md);
-  background-color: var(--surface);
+  background-color: rgba(21, 29, 56, 0.85);
   color: var(--text);
   min-height: 48px;
   width: 100%;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+input:focus, textarea:focus, select:focus {
+  border-color: var(--gold-primary);
+  box-shadow: 0 0 8px var(--gold-glow);
 }
 
 .star-icon {
   fill: var(--star);
-  width: 1em;
-  height: 1em;
+  width: 1.1em;
+  height: 1.1em;
   vertical-align: middle;
+  filter: drop-shadow(0 0 4px rgba(255, 201, 71, 0.5));
 }
 
-/* Utils */
+/* Utilities */
 .flex { display: flex; }
 .flex-col { flex-direction: column; }
 .items-center { align-items: center; }
 .justify-between { justify-content: space-between; }
+.justify-center { justify-content: center; }
+.gap-xs { gap: var(--spacing-xs); }
 .gap-sm { gap: var(--spacing-sm); }
 .gap-md { gap: var(--spacing-md); }
 .p-md { padding: var(--spacing-md); }
 .text-center { text-align: center; }
+.text-left { text-align: left; }
 .text-muted { color: var(--muted); }
 .text-lg { font-size: 20px; font-weight: 600; }
 .text-xl { font-size: 24px; font-weight: bold; }

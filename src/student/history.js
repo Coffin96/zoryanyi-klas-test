@@ -1,17 +1,24 @@
 import { listenLedger } from '../data/repo.js';
+import { iconFiligreeDivider, iconPrimogem } from '../components/genshin-icons.js';
 
 export function renderHistory(root, state) {
   root.innerHTML = `
     <div class="container">
-      <h2>Статистика та Історія</h2>
+      <div class="text-center" style="margin-bottom: var(--spacing-sm);">
+        <h2 class="fantasy-title" style="margin: 0 0 4px 0; font-size: 22px;">Хроніка пригод</h2>
+        <p class="text-muted" style="margin: 0; font-size: 13px;">Журнал зароблених та витрачених зірок</p>
+        ${iconFiligreeDivider()}
+      </div>
       
-      <div id="stats-container" class="surface-card flex flex-col gap-sm" style="margin-bottom: var(--spacing-md); display: none;">
-        <h3 style="margin: 0 0 8px 0; font-size: 14px; color: var(--muted);">Мої оцінки</h3>
+      <!-- Мої оцінки (стилізовані під золоті монети / медалі) -->
+      <div id="stats-container" class="surface-card flex flex-col gap-sm" style="margin-bottom: var(--spacing-md); display: none; padding: 14px 16px;">
+        <h3 class="fantasy-title" style="margin: 0 0 8px 0; font-size: 14px; color: var(--gold-light);">Мої оцінки у щоденнику</h3>
         <div id="grade-stats-list" class="flex gap-sm" style="flex-wrap: wrap;"></div>
       </div>
 
+      <!-- Хронологічний список записів -->
       <div id="history-list" class="flex flex-col gap-sm">
-        <p class="text-muted text-center" style="margin-top: 20px;">Завантаження...</p>
+        <p class="text-muted text-center" style="margin-top: 20px;">Завантаження хроніки...</p>
       </div>
     </div>
   `;
@@ -22,7 +29,7 @@ export function renderHistory(root, state) {
     const statsContainer = document.getElementById('stats-container');
     let hasStats = false;
     
-    // Sort keys descending (e.g. 12, 11, 10, 9...)
+    // Сортуємо оцінки за спаданням (12, 11, 10...)
     const sortedGrades = Object.keys(grades).sort((a, b) => Number(b) - Number(a));
     
     let statsHtml = '';
@@ -30,9 +37,9 @@ export function renderHistory(root, state) {
       if (grades[grade] > 0) {
         hasStats = true;
         statsHtml += `
-          <div style="background: var(--bg); padding: 6px 12px; border-radius: var(--radius-sm); border: 1px solid rgba(255,255,255,0.1);">
-            <span style="font-weight: bold; font-size: 16px;">${grade}</span>
-            <span class="text-muted" style="margin-left: 4px; font-size: 12px;">× ${grades[grade]}</span>
+          <div style="background: rgba(10, 15, 34, 0.7); padding: 6px 12px; border-radius: var(--radius-md); border: 1.5px solid var(--gold-border); display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 2px 6px rgba(0,0,0,0.3);">
+            <span style="font-weight: 800; font-size: 16px; color: var(--gold-primary); font-family: var(--font-fantasy);">${grade}</span>
+            <span style="color: var(--muted); font-size: 12px;">× ${grades[grade]}</span>
           </div>
         `;
       }
@@ -44,24 +51,22 @@ export function renderHistory(root, state) {
     }
   }
 
-  // We could cache the listener, but for simplicity we fetch it each time the view is opened.
-  // In a more robust app, we'd unsubscribe when navigating away.
   const unsubscribe = listenLedger(state.uuid, 20, (items) => {
     const listDiv = document.getElementById('history-list');
     if (!listDiv) {
-      unsubscribe(); // the user navigated away
+      unsubscribe();
       return;
     }
 
     if (items.length === 0) {
-      listDiv.innerHTML = '<p class="text-muted text-center" style="margin-top: 20px;">Історія порожня</p>';
+      listDiv.innerHTML = '<p class="text-muted text-center" style="margin-top: 20px;">Хроніка порожня. Отримуй оцінки за щоденником!</p>';
       return;
     }
 
     listDiv.innerHTML = items.map(item => {
       const isPositive = item.delta > 0;
       
-      // 1. Форматування дати (підтримка Firestore Timestamp, ms, ISO string)
+      // 1. Форматування дати
       let date = 'Нещодавно';
       if (item.ts) {
         let ms = null;
@@ -110,12 +115,12 @@ export function renderHistory(root, state) {
       }
 
       return `
-        <div class="surface-card flex justify-between items-center" style="padding: 12px 16px;">
+        <div class="parchment-card flex justify-between items-center" style="padding: 12px 16px;">
           <div>
-            <div style="font-weight: bold; margin-bottom: 2px;">${desc}</div>
-            <div class="text-muted" style="font-size: 12px;">${date}</div>
+            <div style="font-weight: 700; font-size: 14px; color: var(--text-parchment); margin-bottom: 2px;">${desc}</div>
+            <div style="font-size: 11px; color: var(--text-parchment-subtle);">${date}</div>
           </div>
-          <div style="font-weight: bold; font-size: 16px; color: ${isPositive ? 'var(--star)' : 'var(--text)'};">
+          <div style="font-weight: 800; font-size: 16px; font-family: var(--font-fantasy); color: ${isPositive ? 'var(--gold-deep)' : '#8b2626'}; white-space: nowrap;">
             ${isPositive ? '+' : ''}${item.delta} ✦
           </div>
         </div>
@@ -124,7 +129,7 @@ export function renderHistory(root, state) {
   }, err => {
     const listDiv = document.getElementById('history-list');
     if (listDiv) {
-      listDiv.innerHTML = '<p class="text-muted text-center" style="margin-top: 20px;">Помилка завантаження історії</p>';
+      listDiv.innerHTML = '<p class="error-text text-center" style="margin-top: 20px;">Помилка завантаження хроніки</p>';
     }
   });
 }

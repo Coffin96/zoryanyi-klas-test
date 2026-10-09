@@ -1,13 +1,12 @@
 import { forecastDemand } from '../engine/helpers.js';
 
 /**
- * Рендеринг розділу «Бюджет та прогноз потреби» (M7)
+ * Рендеринг розділу «Бюджет та прогноз потреби» (M7) у стилі Genshin
  */
 export function renderBudgetSection(container, profiles, config, stock = {}) {
   let priceMultiplier = 1.0;
 
   function calculate(multiplier) {
-    // Створюємо симульовану конфігурацію зі скоригованими цінами
     const simConfig = {
       ...config,
       shop: (config.shop || []).map(item => ({
@@ -63,10 +62,10 @@ export function renderBudgetSection(container, profiles, config, stock = {}) {
     const data = calculate(priceMultiplier);
 
     container.innerHTML = `
-      <div class="surface-card flex flex-col gap-md" style="margin-bottom: var(--spacing-md);">
-        <div class="flex justify-between items-center">
-          <h3 style="margin:0;">📊 Бюджет та прогноз потреби</h3>
-          <span class="badge" style="background: ${data.isExceeded ? 'rgba(255, 82, 82, 0.2)' : 'rgba(61, 220, 151, 0.2)'}; color: ${data.isExceeded ? 'var(--danger)' : 'var(--ok)'}; font-weight: bold; font-size: 13px;">
+      <div class="surface-card flex flex-col gap-md" style="margin-bottom: var(--spacing-md); border: 1.5px solid var(--gold-border);">
+        <div class="flex justify-between items-center" style="flex-wrap: wrap; gap: 8px;">
+          <h3 class="fantasy-title" style="margin:0; font-size: 17px; color: var(--gold-light);">📊 Бюджет та прогноз потреби</h3>
+          <span class="badge-tag" style="background: ${data.isExceeded ? 'rgba(255, 82, 82, 0.25)' : 'rgba(61, 220, 151, 0.25)'}; color: ${data.isExceeded ? '#ff8585' : 'var(--cyan-accent)'}; font-weight: bold; border-color: ${data.isExceeded ? '#cf4343' : 'var(--cyan-accent)'}; font-size: 12px;">
             ${data.isExceeded ? '⚠️ Перевищення ліміту' : '✓ В межах бюджету'}
           </span>
         </div>
@@ -76,17 +75,17 @@ export function renderBudgetSection(container, profiles, config, stock = {}) {
         </p>
 
         <!-- Картка статусу бюджету -->
-        <div style="background: var(--bg); padding: 14px; border-radius: var(--radius-md); border: 1px solid rgba(255,255,255,0.1);">
+        <div style="background: rgba(10, 15, 34, 0.6); padding: 14px; border-radius: var(--radius-md); border: 1px solid rgba(214, 181, 115, 0.3);">
           <div class="flex justify-between items-center" style="margin-bottom: 8px;">
-            <span style="font-size: 14px;">Очікувані витрати:</span>
-            <span style="font-size: 20px; font-weight: bold; color: ${data.isExceeded ? 'var(--danger)' : 'var(--ok)'};">
+            <span style="font-size: 13px; color: var(--gold-light);">Очікувані витрати:</span>
+            <span style="font-size: 18px; font-weight: 800; font-family: var(--font-fantasy); color: ${data.isExceeded ? '#ff8585' : 'var(--cyan-accent)'};">
               ${data.totalEstimatedUah.toFixed(2)} грн / ${data.budgetLimit} грн
             </span>
           </div>
 
-          <!-- Смуга витрат -->
-          <div style="width: 100%; background: rgba(255,255,255,0.1); height: 10px; border-radius: 5px; overflow: hidden; margin-bottom: 6px;">
-            <div style="width: ${data.percent}%; background: ${data.isExceeded ? 'var(--danger)' : 'var(--ok)'}; height: 100%;"></div>
+          <!-- Смуга витрат у латунному жолобі -->
+          <div class="genshin-progress-track dark-track" style="height: 10px; margin-bottom: 6px;">
+            <div class="${data.isExceeded ? 'genshin-progress-fill-gold' : 'genshin-progress-fill-cyan'}" style="width: ${data.percent}%; ${data.isExceeded ? 'background: linear-gradient(90deg, #e67e22, #cf4343);' : ''}"></div>
           </div>
           <div class="flex justify-between text-muted" style="font-size: 11px;">
             <span>Використано ${data.percent}%</span>
@@ -95,27 +94,27 @@ export function renderBudgetSection(container, profiles, config, stock = {}) {
         </div>
 
         ${data.isExceeded ? `
-          <div style="background: rgba(255, 82, 82, 0.12); border-left: 4px solid var(--danger); padding: 10px 14px; border-radius: 4px; font-size: 13px;">
+          <div style="background: rgba(207, 67, 67, 0.15); border-left: 3px solid #cf4343; padding: 10px 14px; border-radius: 4px; font-size: 13px; color: #ffb8b8;">
             <strong>Порада для стабілізації:</strong> учні мають достатньо зірок, щоб викупити солодкі призи понад ліміт 550 грн/місяць. Рекомендується підвищити вартість солодощів на 1–2 ✦ або додати цікаві нематеріальні привілеї (музика, сидіння з другом).
           </div>
         ` : ''}
 
         <!-- Прогноз потреби за товарами -->
         <div>
-          <div style="font-weight: 600; font-size: 14px; margin-bottom: 8px;">🛒 Очікуваний попит на солодощі:</div>
+          <div class="fantasy-title" style="font-weight: 600; font-size: 14px; margin-bottom: 8px; color: var(--gold-light);">🛒 Очікуваний попит на солодощі:</div>
           <div class="flex flex-col gap-xs">
             ${data.itemsBreakdown.map(item => `
-              <div class="flex justify-between items-center" style="padding: 8px 12px; background: var(--bg); border-radius: var(--radius-sm); font-size: 13px;">
+              <div class="parchment-card flex justify-between items-center" style="padding: 8px 12px; font-size: 13px;">
                 <div class="flex items-center gap-sm">
-                  <span>${item.icon}</span>
+                  <span style="font-size: 20px;">${item.icon}</span>
                   <div>
-                    <span style="font-weight: 600;">${item.name}</span>
-                    <span class="text-muted" style="font-size: 11px;">(${item.price} ✦ · собівартість ${item.unitCost} грн)</span>
+                    <span style="font-weight: 700; color: var(--text-parchment);">${item.name}</span>
+                    <span style="font-size: 11px; color: var(--text-parchment-muted);">(${item.price} ✦ · собівартість ${item.unitCost} грн)</span>
                   </div>
                 </div>
                 <div style="text-align: right;">
-                  <strong>${item.count} шт.</strong>
-                  <div class="text-muted" style="font-size: 11px;">${item.totalUah.toFixed(2)} грн</div>
+                  <strong style="color: var(--text-parchment);">${item.count} шт.</strong>
+                  <div style="font-size: 11px; color: var(--text-parchment-muted);">${item.totalUah.toFixed(2)} грн</div>
                 </div>
               </div>
             `).join('')}
@@ -123,18 +122,18 @@ export function renderBudgetSection(container, profiles, config, stock = {}) {
         </div>
 
         <!-- Симулятор «Що, якщо» (T7.4) -->
-        <div style="background: rgba(124, 77, 255, 0.08); border: 1px dashed var(--accent); padding: 14px; border-radius: var(--radius-md);">
+        <div style="background: rgba(14, 38, 56, 0.7); border: 1px dashed var(--gold-border); padding: 14px; border-radius: var(--radius-md);">
           <div class="flex justify-between items-center" style="margin-bottom: 6px;">
-            <span style="font-weight: 600; font-size: 14px;">🎛️ Симулятор цін («Що, якщо»):</span>
-            <strong style="color: var(--accent);">${priceMultiplier.toFixed(1)}x</strong>
+            <span class="fantasy-title" style="font-weight: 600; font-size: 14px; color: var(--gold-light);">🎛️ Симулятор цін («Що, якщо»):</span>
+            <strong style="color: var(--cyan-accent); font-family: var(--font-fantasy);">${priceMultiplier.toFixed(1)}x</strong>
           </div>
           <p class="text-muted" style="font-size: 12px; margin: 0 0 10px 0;">
             Потягніть повзунок, щоб перевірити, як зміна цін у зірках вплине на щомісячний бюджет класу.
           </p>
           <div class="flex items-center gap-md">
-            <span style="font-size: 12px;">Дешевше (0.7x)</span>
+            <span style="font-size: 12px; color: var(--muted);">Дешевше (0.7x)</span>
             <input type="range" id="price-sim-slider" min="0.7" max="1.8" step="0.1" value="${priceMultiplier}" style="flex:1;">
-            <span style="font-size: 12px;">Дорожче (1.8x)</span>
+            <span style="font-size: 12px; color: var(--muted);">Дорожче (1.8x)</span>
           </div>
         </div>
       </div>

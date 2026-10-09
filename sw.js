@@ -1,4 +1,4 @@
-const CACHE_NAME = 'zoryanyi-klas-v5';
+const CACHE_NAME = 'zoryanyi-klas-v6';
 const ASSETS = [
   './',
   './index.html',
@@ -12,6 +12,8 @@ const ASSETS = [
   './vendor/qrcode.min.js',
   './src/app.js',
   './src/teacher.js',
+  './src/components/genshin-icons.js',
+  './src/components/star-icon.js',
   './src/data/firebase.js',
   './src/data/firebase-config.js',
   './src/data/repo.js',

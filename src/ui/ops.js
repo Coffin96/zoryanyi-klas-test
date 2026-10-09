@@ -2,31 +2,31 @@ import { exportAllData, downloadBackupFile, importBackupData, checkDataIntegrity
 import { showToast } from './app.js';
 
 /**
- * Рендеринг розділу «Експлуатація та резервні копії» (M8)
+ * Рендеринг розділу «Експлуатація та резервні копії» (M8) у стилі Genshin
  */
 export function renderOpsSection(container, profiles, onRefresh) {
   let integrityIssues = null;
 
   function updateView() {
     container.innerHTML = `
-      <div class="surface-card flex flex-col gap-md" style="margin-bottom: var(--spacing-md);">
-        <h3 style="margin:0;">⚙️ Експлуатація та резервні копії</h3>
+      <div class="surface-card flex flex-col gap-md" style="margin-bottom: var(--spacing-md); border: 1.5px solid var(--gold-border);">
+        <h3 class="fantasy-title" style="margin:0; font-size: 17px; color: var(--gold-light);">⚙️ Експлуатація та резервні копії</h3>
         <p class="text-muted" style="margin:0; font-size: 13px;">
           Керування безпекою даних, регулярне резервне копіювання та підготовка до нового навчального року.
         </p>
 
         <!-- 1. Резервне копіювання (T8.1) -->
-        <div style="background: var(--bg); padding: 14px; border-radius: var(--radius-md); border: 1px solid rgba(255,255,255,0.08);">
-          <div style="font-weight: 600; font-size: 14px; margin-bottom: 4px;">💾 Резервна копія бази (JSON)</div>
+        <div style="background: rgba(10, 15, 34, 0.6); padding: 14px; border-radius: var(--radius-md); border: 1px solid rgba(214, 181, 115, 0.3);">
+          <div class="fantasy-title" style="font-weight: 600; font-size: 14px; margin-bottom: 4px; color: var(--gold-light);">💾 Резервна копія бази (JSON)</div>
           <p class="text-muted" style="font-size: 12px; margin: 0 0 10px 0;">
             Рекомендується робити експорт раз на місяць або перед будь-якими масовими змінами.
           </p>
 
           <div class="flex gap-sm flex-wrap">
-            <button id="btn-export-json" class="primary" style="padding: 8px 14px; font-size: 13px;">
+            <button id="btn-export-json" class="btn-genshin-gold" style="padding: 8px 16px; font-size: 13px; border-radius: 12px;">
               📥 Завантажити бекап (.json)
             </button>
-            <label class="btn" style="padding: 8px 14px; font-size: 13px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); border-radius: var(--radius-sm); cursor: pointer; display: inline-flex; align-items: center;">
+            <label class="surface-card" style="padding: 8px 14px; font-size: 13px; border: 1px solid var(--gold-border); border-radius: 12px; cursor: pointer; display: inline-flex; align-items: center; color: var(--gold-light); min-height: 42px;">
               📤 Відновити з файлу
               <input type="file" id="input-import-json" accept=".json" style="display: none;">
             </label>
@@ -34,10 +34,10 @@ export function renderOpsSection(container, profiles, onRefresh) {
         </div>
 
         <!-- 2. Перевірка цілісності даних (T8.2) -->
-        <div style="background: var(--bg); padding: 14px; border-radius: var(--radius-md); border: 1px solid rgba(255,255,255,0.08);">
+        <div style="background: rgba(10, 15, 34, 0.6); padding: 14px; border-radius: var(--radius-md); border: 1px solid rgba(214, 181, 115, 0.3);">
           <div class="flex justify-between items-center" style="margin-bottom: 4px;">
-            <div style="font-weight: 600; font-size: 14px;">🔍 Перевірка цілісності бази</div>
-            <button id="btn-check-integrity" style="padding: 6px 12px; font-size: 12px; background: rgba(255,255,255,0.08);">
+            <div class="fantasy-title" style="font-weight: 600; font-size: 14px; color: var(--gold-light);">🔍 Перевірка цілісності бази</div>
+            <button id="btn-check-integrity" class="surface-card" style="padding: 6px 14px; font-size: 12px; border: 1px solid var(--gold-border); border-radius: 10px; color: var(--gold-light); min-height: 36px;">
               Перевірити зараз
             </button>
           </div>
@@ -49,21 +49,21 @@ export function renderOpsSection(container, profiles, onRefresh) {
             ${integrityIssues === null ? `
               <div class="text-muted" style="font-size: 12px;">Натисніть кнопку, щоб запустити діагностику.</div>
             ` : integrityIssues.length === 0 ? `
-              <div style="color: var(--ok); font-size: 13px; font-weight: 600;">
+              <div style="color: var(--cyan-accent); font-size: 13px; font-weight: 600;">
                 ✓ Усі дані цілісні. Помилок не виявлено (перевірено ${profiles.length} учнів).
               </div>
             ` : `
-              <div style="background: rgba(255, 82, 82, 0.12); padding: 10px; border-radius: var(--radius-sm); margin-bottom: 8px;">
-                <div style="color: var(--danger); font-weight: bold; font-size: 13px; margin-bottom: 4px;">
+              <div style="background: rgba(207, 67, 67, 0.15); border: 1px solid #cf4343; padding: 10px; border-radius: var(--radius-sm); margin-bottom: 8px;">
+                <div style="color: #ff8585; font-weight: bold; font-size: 13px; margin-bottom: 4px;">
                   ⚠️ Знайдено порушень: ${integrityIssues.length}
                 </div>
-                <div class="flex flex-col gap-xs" style="font-size: 12px;">
+                <div class="flex flex-col gap-xs" style="font-size: 12px; color: #ffb8b8;">
                   ${integrityIssues.map(i => `
                     <div>• <strong>${i.alias}</strong>: ${i.message}</div>
                   `).join('')}
                 </div>
               </div>
-              <button id="btn-fix-integrity" class="primary" style="padding: 6px 12px; font-size: 12px;">
+              <button id="btn-fix-integrity" class="btn-genshin-gold" style="padding: 8px 14px; font-size: 12px; border-radius: 10px;">
                 🔧 Автоматично виправити виявлені помилки
               </button>
             `}
@@ -71,12 +71,12 @@ export function renderOpsSection(container, profiles, onRefresh) {
         </div>
 
         <!-- 3. Завершення навчального року (T8.5) -->
-        <div style="background: var(--bg); padding: 14px; border-radius: var(--radius-md); border: 1px solid rgba(255, 82, 82, 0.2);">
-          <div style="font-weight: 600; font-size: 14px; color: var(--text); margin-bottom: 4px;">🎓 Завершення навчального року</div>
+        <div style="background: rgba(10, 15, 34, 0.6); padding: 14px; border-radius: var(--radius-md); border: 1px solid rgba(207, 67, 67, 0.4);">
+          <div class="fantasy-title" style="font-weight: 600; font-size: 14px; color: #ff8585; margin-bottom: 4px;">🎓 Завершення навчального року</div>
           <p class="text-muted" style="font-size: 12px; margin: 0 0 10px 0;">
             Наприкінці травня баланси учнів фіксуються в історії та обнуляються для нового навчального року.
           </p>
-          <button id="btn-archive-year" style="padding: 8px 14px; font-size: 13px; background: transparent; border: 1px solid var(--danger); color: var(--danger);">
+          <button id="btn-archive-year" class="btn-genshin-crimson" style="padding: 8px 16px; font-size: 13px; border-radius: 12px;">
             🧹 Обнулити баланси для нового року
           </button>
         </div>
