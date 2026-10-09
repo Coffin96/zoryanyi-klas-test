@@ -6,16 +6,14 @@ import { kyivParts } from '../engine/time.js';
 import { iconFiligreeDivider } from '../components/genshin-icons.js';
 
 let stream = null;
-let scanInterval = null;
+let animationFrameId = null;
+let isStarting = false;
 
 export function renderScanner(root) {
   root.innerHTML = `
     <div class="container">
       <div class="top-bar flex justify-between items-center">
         <h2 class="fantasy-title" style="margin:0; font-size: 20px;">Сканер QR-кодів</h2>
-        <button id="btn-to-students-top" class="btn-genshin-gold" style="padding: 6px 14px; font-size: 13px; min-height: 36px; border-radius: 12px;">
-          👥 Учні
-        </button>
       </div>
 
       <div class="scanner-container">
@@ -43,59 +41,86 @@ export function renderScanner(root) {
     navigate('student-list');
   };
 
-  document.getElementById('btn-to-students-top').addEventListener('click', goToList);
   document.getElementById('btn-list').addEventListener('click', goToList);
   document.getElementById('btn-quick-create').addEventListener('click', goToList);
 
   startScanner();
 }
 
-async function startScanner() {
-  const video = document.getElementById('scanner-video');
+export async function startScanner(videoElement, canvasElement, callback) {
+  const video = videoElement || document.getElementById('scanner-video');
   const msgEl = document.getElementById('scanner-msg');
   if (!video) return;
 
+  if (stream && video.srcObject === stream && animationFrameId) {
+    return;
+  }
+
+  if (isStarting) return;
+  isStarting = true;
+
   try {
+    stopScanner();
+
     stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
     video.srcObject = stream;
-    video.setAttribute("playsinline", true);
+    video.setAttribute("playsinline", "true");
     await video.play();
     
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
+    const canvas = canvasElement || document.createElement('canvas');
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    const onScan = callback || handleScan;
 
-    scanInterval = setInterval(() => {
+    let lastScanTime = 0;
+    const scanLoop = (timestamp) => {
+      if (!stream) return;
       if (video.readyState === video.HAVE_ENOUGH_DATA) {
-        canvas.height = video.videoHeight;
-        canvas.width = video.videoWidth;
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        
-        // window.jsQR comes from vendor/jsQR.min.js
-        const code = window.jsQR(imageData.data, imageData.width, imageData.height, {
-          inversionAttempts: "dontInvert",
-        });
+        if (!lastScanTime || timestamp - lastScanTime >= 150) {
+          lastScanTime = timestamp;
+          canvas.height = video.videoHeight;
+          canvas.width = video.videoWidth;
+          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          
+          // window.jsQR comes from vendor/jsQR.min.js
+          if (window.jsQR) {
+            const code = window.jsQR(imageData.data, imageData.width, imageData.height, {
+              inversionAttempts: "dontInvert",
+            });
 
-        if (code && code.data) {
-          handleScan(code.data);
+            if (code && code.data) {
+              onScan(code.data);
+            }
+          }
         }
       }
-    }, 250);
+      animationFrameId = requestAnimationFrame(scanLoop);
+    };
+
+    animationFrameId = requestAnimationFrame(scanLoop);
   } catch (err) {
     console.error(err);
-    msgEl.textContent = texts.scan.noCamera;
-    msgEl.classList.add('error-text');
+    if (msgEl) {
+      msgEl.textContent = texts.scan?.noCamera || 'Камера недоступна';
+      msgEl.classList.add('error-text');
+    }
+  } finally {
+    isStarting = false;
   }
 }
 
 export function stopScanner() {
-  if (scanInterval) {
-    clearInterval(scanInterval);
-    scanInterval = null;
+  if (animationFrameId) {
+    cancelAnimationFrame(animationFrameId);
+    animationFrameId = null;
   }
   if (stream) {
     stream.getTracks().forEach(t => t.stop());
     stream = null;
+  }
+  const video = document.getElementById('scanner-video');
+  if (video) {
+    video.srcObject = null;
   }
 }
 

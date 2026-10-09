@@ -1,6 +1,7 @@
 import { appState, navigate, showToast } from './app.js';
 import { listenProfile, updateStudentAlias } from '../data/repo.js';
-import { credit, redeem, undo, awardManual } from '../data/tx.js';
+import { credit, redeem, undo, awardManual, runTransaction } from '../data/tx.js';
+export { runTransaction };
 import { creditGrades, levelOf } from '../engine/economy.js';
 import { getInitials } from '../data/names-db.js';
 import { generateQRUrl } from '../engine/qr-protocol.js';
@@ -28,9 +29,6 @@ export function renderStudentPanel(root) {
           <h2 id="panel-title-alias" class="fantasy-title" style="margin:0; font-size: 18px;">${aliasDisplay}</h2>
           <button id="btn-edit-student-alias" style="background:transparent; border:none; cursor:pointer; font-size:15px; padding:2px; min-height:auto; min-width:auto; color:var(--gold-light);" title="Змінити псевдонім">✏️</button>
         </div>
-        <button id="btn-to-scanner-top" class="btn-genshin-gold" style="padding: 6px 14px; font-size: 13px; min-height: 36px; border-radius: 12px;">
-          📷 Сканер
-        </button>
       </div>
 
       <!-- Картка учня з балансом та QR-кнопкою (у стилі Genshin) -->
@@ -46,6 +44,9 @@ export function renderStudentPanel(root) {
 
       <!-- Банер активного замовлення учня за QR-кодом -->
       <div id="order-banner-container"></div>
+
+      <!-- Спеціальна подія класу (Етап 6) -->
+      <div id="teacher-event-container"></div>
 
       <!-- Оцінки з щоденника (Клавіатура у стилі талантів Genshin) -->
       <div class="surface-card" style="margin-bottom: var(--spacing-md);">
@@ -117,7 +118,6 @@ export function renderStudentPanel(root) {
 
   document.getElementById('btn-back-list').addEventListener('click', goBackToList);
   document.getElementById('btn-back-bottom').addEventListener('click', goBackToList);
-  document.getElementById('btn-to-scanner-top').addEventListener('click', goToScanner);
   document.getElementById('btn-next-student').addEventListener('click', goToScanner);
 
   const btnEditAlias = document.getElementById('btn-edit-student-alias');
@@ -192,6 +192,7 @@ export function renderStudentPanel(root) {
   renderGradesGrid();
   renderShop();
   renderQuests();
+  renderTeacherEvent();
 
   document.getElementById('btn-credit').addEventListener('click', handleCredit);
 
@@ -508,7 +509,55 @@ function updatePanel() {
   }
 
   renderOrderBanner();
+  renderTeacherEvent();
   updatePreview();
   renderShop();
   renderQuests();
 }
+
+function renderTeacherEvent() {
+  const container = document.getElementById('teacher-event-container');
+  if (!container) return;
+  const cfg = (typeof window !== 'undefined' && window.zklas?.config) || appState.config;
+  const event = cfg?.event;
+  const isActive = (typeof window !== 'undefined' && window.zklas?.config?.event?.active === true) || event?.active === true;
+  if (!event || !isActive) {
+    container.innerHTML = '';
+    return;
+  }
+
+  container.innerHTML = `
+    <div class="surface-card flex flex-col gap-xs" style="margin-bottom: var(--spacing-md); border: 2px solid var(--gold-border); background: radial-gradient(circle at top right, rgba(229,195,120,0.18), rgba(10, 15, 34, 0.9)); padding: 12px 14px;">
+      <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--gold-light); font-weight: bold;">
+        🏆 Спеціальна подія класу
+      </div>
+      <button id="btn-complete-event" class="btn-genshin-gold" style="width: 100%; padding: 12px 16px; font-size: 14px; font-weight: bold; border-radius: 12px; display: flex; align-items: center; justify-content: center; gap: 6px;">
+        🏆 Виконав подію: ${event.name} (+${event.reward}✦)
+      </button>
+    </div>
+  `;
+
+  const btn = document.getElementById('btn-complete-event');
+  if (btn) {
+    btn.addEventListener('click', async () => {
+      const userId = (profile && profile.id) || appState.currentStudent?.uuid;
+      if (!userId) return;
+      if (!confirm(`Зарахувати нагороду +${event.reward} ✦ за подію "${event.name}"?`)) return;
+      btn.disabled = true;
+      try {
+        const res = await runTransaction(userId, 'add', event.reward, 'Подія: ' + event.name);
+        if (res && res.ok) {
+          showToast(`🏆 Виконано подію: ${event.name} (+${event.reward} ✦)`);
+        } else {
+          showToast(`🏆 Нараховано +${event.reward} ✦ за подію "${event.name}"`);
+        }
+      } catch (err) {
+        console.error(err);
+        alert('Помилка зарахування події: ' + err.message);
+      } finally {
+        btn.disabled = false;
+      }
+    });
+  }
+}
+

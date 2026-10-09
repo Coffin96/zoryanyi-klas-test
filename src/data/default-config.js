@@ -14,6 +14,11 @@ export const defaultConfig = {
   grades: { "12": 6, "11": 5, "10": 4, "9": 3, "8": 2, "7": 1 },
   questMonthlyCap: 30,
   questWeeklyCap: 15,
+  event: {
+    name: "Конкурс",
+    reward: 10,
+    active: false
+  },
   shop: [
     { id: "caramel", name: "Карамель", icon: "🍬", category: "sweet", price: 7, active: true, order: 1, unitCost: 2.25 },
     { id: "jelly", name: "Желейка", icon: "🍮", category: "sweet", price: 12, active: true, order: 2, unitCost: 3.96 },
@@ -26,7 +31,9 @@ export const defaultConfig = {
     { id: "sequence", type: "consecutive", title: "Послідовність", icon: "🎯", period: "weekly", active: true, reward: 3, perWeek: 1, params: { minGrade: 7, length: 3 }, desc: "3 оцінки від 7 балів поспіль" },
     { id: "brilliant_result", type: "target_grade", title: "Блискучий результат", icon: "✨", period: "weekly", active: true, reward: 4, perWeek: 2, params: { grade: 12 }, desc: "Отримай оцінку 12 (до 2 разів на тиждень)" },
     { id: "steady_step", type: "monthly_growth", title: "Впевнений крок", icon: "📈", period: "monthly", active: true, reward: 10, perMonth: 1, params: { minTotalGrades: 10 }, desc: "Середній бал місяця вищий за попередній (від 10 оцінок)" },
-    { id: "holding_height", type: "monthly_average", title: "Утримання висоти", icon: "👑", period: "monthly", active: true, reward: 15, perMonth: 1, params: { minAverage: 10 }, desc: "Середній бал понад 10 протягом місяця" }
+    { id: "holding_height", type: "monthly_average", title: "Утримання висоти", icon: "👑", period: "monthly", active: true, reward: 15, perMonth: 1, params: { minAverage: 10 }, desc: "Середній бал понад 10 протягом місяця" },
+    { id: "lifetime_50", type: "lifetime_milestone", title: "Перший ювілей", icon: "⭐", period: "lifetime", active: true, reward: 3, target: 50, limit: 1, description: "Назбирай 50 зірочок за весь час", desc: "Назбирай 50 зірочок за весь час" },
+    { id: "lifetime_100", type: "lifetime_milestone", title: "Сотник зірок", icon: "🌟", period: "lifetime", active: true, reward: 5, target: 100, limit: 1, description: "Назбирай 100 зірочок за весь час", desc: "Назбирай 100 зірочок за весь час" }
   ],
   levels: [
     { min: 0, name: "Іскорка" },

@@ -17,10 +17,15 @@ export const state = {
   profile: null,
   config: null,
   view: 'home',
-  offline: !navigator.onLine,
+  offline: typeof navigator !== 'undefined' ? !navigator.onLine : false,
   error: null,
   toastTimeout: null
 };
+
+if (typeof window !== 'undefined') {
+  window.zklas = state;
+  window.showStudentToast = showStudentToast;
+}
 
 export function initStudentApp() {
   const urlParams = new URLSearchParams(window.location.search);

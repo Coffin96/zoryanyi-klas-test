@@ -1,7 +1,7 @@
 import { onTeacherStateChanged, logoutTeacher } from '../data/firebase.js';
 import { listenConfig, listenStock } from '../data/repo.js';
 import { renderAuth } from './auth.js';
-import { renderScanner, stopScanner } from './scanner.js';
+import { renderScanner, stopScanner, startScanner } from './scanner.js';
 import { renderStudentPanel } from './student-panel.js';
 import { renderStudentList } from './student-list.js';
 import { renderAdmin } from './admin.js';
@@ -19,6 +19,10 @@ export const appState = {
   toastTimeout: null
 };
 
+if (typeof window !== 'undefined') {
+  window.zklas = appState;
+}
+
 export function initApp() {
   onTeacherStateChanged(user => {
     appState.user = user;
@@ -35,6 +39,7 @@ export function initApp() {
         e => console.error('Stock listen error:', e)
       );
     } else {
+      stopScanner();
       appState.view = 'auth';
       render();
     }
@@ -42,8 +47,8 @@ export function initApp() {
 }
 
 export function navigate(view, params = {}) {
-  // If moving away from scanner, cleanly release camera
-  if (appState.view === 'scanner' && view !== 'scanner') {
+  // If moving away from scanner to any other tab, cleanly release camera
+  if (view !== 'scanner') {
     stopScanner();
   }
   appState.view = view;
@@ -52,6 +57,9 @@ export function navigate(view, params = {}) {
     appState.currentOrder = params.order || null;
   }
   render();
+  if (view === 'scanner') {
+    startScanner();
+  }
 }
 
 export function showToast(msg, action = null) {
@@ -162,7 +170,13 @@ function render() {
   `;
 
   document.querySelectorAll('.genshin-nav-btn[data-view]').forEach(btn => {
-    btn.addEventListener('click', () => navigate(btn.dataset.view));
+    btn.addEventListener('click', () => {
+      const targetView = btn.dataset.view;
+      if (targetView !== 'scanner') {
+        stopScanner();
+      }
+      navigate(targetView);
+    });
   });
 
   const logoutBtn = document.getElementById('btn-global-logout');
@@ -178,6 +192,7 @@ function render() {
   const container = document.getElementById('teacher-view-container');
   if (appState.view === 'scanner') {
     renderScanner(container);
+    startScanner();
   } else if (appState.view === 'student-panel') {
     renderStudentPanel(container);
   } else if (appState.view === 'student-list') {

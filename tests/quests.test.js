@@ -2,7 +2,14 @@ import { test, describe } from 'node:test';
 import assert from 'node:assert';
 import { kyivParts } from '../src/engine/time.js';
 import { creditGrades } from '../src/engine/economy.js';
-import { validateQuest, getPreviousMonthKey } from '../src/engine/quests.js';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { validateQuest, getPreviousMonthKey, findNearestQuest } from '../src/engine/quests.js';
+import { defaultConfig } from '../src/data/default-config.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const questCfg = {
   settings: { dupWindowMin: 5, refPerStar: 0.321 },
@@ -430,6 +437,156 @@ describe('Expanded Quests System (Stage 3)', () => {
 
       assert.strictEqual(p.counters['2610']['holding_height'], 1);
       assert.strictEqual(p.counters['2610'].questStars, 15);
+    });
+  });
+
+  describe('9. Пасивна прогресія та квести життєвого циклу (lifetime_milestone) - Етап 5', () => {
+    const lifetimeQuest100 = {
+      id: 'lifetime_100',
+      type: 'lifetime_milestone',
+      title: 'Сотник зірок',
+      target: 100,
+      reward: 5,
+      limit: 1,
+      active: true,
+      period: 'lifetime'
+    };
+
+    test('validateQuest: правильний розрахунок прогресу та цілі для lifetime_milestone', () => {
+      const p = emptyProfile();
+      p.earned = 45;
+
+      const val = validateQuest(p, lifetimeQuest100);
+      assert.strictEqual(val.isLifetime, true);
+      assert.strictEqual(val.progress, 45);
+      assert.strictEqual(val.target, 100);
+      assert.strictEqual(val.percent, 45);
+      assert.strictEqual(val.eligible, false);
+      assert.strictEqual(val.completed, false);
+      assert.strictEqual(val.limit, 1);
+      assert.strictEqual(val.limitReached, false);
+      assert.strictEqual(val.periodKey, 'lifetime');
+    });
+
+    test('validateQuest: квест виконано, коли profile.earned >= target', () => {
+      const p = emptyProfile();
+      p.earned = 100;
+
+      const val = validateQuest(p, lifetimeQuest100);
+      assert.strictEqual(val.progress, 100);
+      assert.strictEqual(val.eligible, true);
+      assert.strictEqual(val.completed, true);
+      assert.strictEqual(val.percent, 100);
+    });
+
+    test('validateQuest: понад 100% прогресу обмежується 100% у percent', () => {
+      const p = emptyProfile();
+      p.earned = 150;
+
+      const val = validateQuest(p, lifetimeQuest100);
+      assert.strictEqual(val.progress, 150);
+      assert.strictEqual(val.eligible, true);
+      assert.strictEqual(val.percent, 100);
+    });
+
+    test('creditGrades: автоматично нагороджує при досягненні цілі', () => {
+      let p = emptyProfile();
+      p.earned = 95;
+      p.balance = 50;
+
+      const customCfg = {
+        ...questCfg,
+        quests: [...questCfg.quests, lifetimeQuest100]
+      };
+
+      const t = Date.parse('2026-10-05T10:00:00Z');
+      // Оцінка 12 дає 6 зірок: 95 + 6 = 101 >= 100
+      const res = creditGrades(p, [12], customCfg, t);
+      p = res.profile;
+
+      const lifetimeEv = res.events.find(e => e.quest === 'lifetime_100');
+      assert.ok(lifetimeEv, 'Повинна бути подія виконання lifetime_100');
+      assert.strictEqual(lifetimeEv.delta, 5);
+
+      assert.strictEqual(p.counters.lifetime['lifetime_100'], 1);
+      assert.strictEqual(p.stats.quests['lifetime_100'], 1);
+      // Баланс: 50 + 6 (оцінка 12) + 4 (квест brilliant_result) + 15 (квест holding_height) + 5 (lifetime_100) = 80
+      assert.strictEqual(p.balance, 80);
+    });
+
+    test('Одноразовість: повторне отримання оцінок не нараховує lifetime квест повторно', () => {
+      let p = emptyProfile();
+      p.earned = 95;
+      p.balance = 50;
+
+      const customCfg = {
+        ...questCfg,
+        quests: [...questCfg.quests, lifetimeQuest100]
+      };
+
+      const t = Date.parse('2026-10-05T10:00:00Z');
+      let res = creditGrades(p, [12], customCfg, t);
+      p = res.profile;
+      assert.strictEqual(p.counters.lifetime['lifetime_100'], 1);
+
+      // Наступна оцінка
+      res = creditGrades(p, [10], customCfg, t + 3600000);
+      p = res.profile;
+
+      assert.strictEqual(res.events.some(e => e.quest === 'lifetime_100'), false);
+      assert.strictEqual(p.counters.lifetime['lifetime_100'], 1);
+    });
+
+    test('findNearestQuest: знаходить незакритий lifetime_milestone за найвищим відсотком', () => {
+      const p = emptyProfile();
+      p.earned = 80;
+
+      const cfgWithLifetime = {
+        questWeeklyCap: 15,
+        questMonthlyCap: 30,
+        quests: [
+          { id: 'q_far', type: 'target_grade', active: true, reward: 2, params: { grade: 12 } },
+          lifetimeQuest100 // 80 / 100 = 80%
+        ]
+      };
+
+      const nearest = findNearestQuest(p, cfgWithLifetime);
+      assert.ok(nearest);
+      assert.strictEqual(nearest.quest.id, 'lifetime_100');
+      assert.strictEqual(nearest.percent, 80);
+      assert.strictEqual(nearest.isLifetime, true);
+    });
+
+    test('firebase/seed/published.json та defaultConfig містять lifetime квести', () => {
+      const publishedPath = path.resolve(__dirname, '../firebase/seed/published.json');
+      const published = JSON.parse(fs.readFileSync(publishedPath, 'utf8'));
+
+      const pubQuests = published.quests || [];
+      const pubL100 = pubQuests.find(q => q.id === 'lifetime_100');
+      assert.ok(pubL100, 'published.json повинен містити lifetime_100');
+      assert.strictEqual(pubL100.type, 'lifetime_milestone');
+      assert.strictEqual(pubL100.target, 100);
+      assert.strictEqual(pubL100.reward, 5);
+
+      const pubL50 = pubQuests.find(q => q.id === 'lifetime_50');
+      assert.ok(pubL50, 'published.json повинен містити lifetime_50');
+      assert.strictEqual(pubL50.type, 'lifetime_milestone');
+      assert.strictEqual(pubL50.target, 50);
+
+      const defQuests = defaultConfig.quests || [];
+      const defL100 = defQuests.find(q => q.id === 'lifetime_100');
+      assert.ok(defL100, 'defaultConfig повинен містити lifetime_100');
+      assert.strictEqual(defL100.type, 'lifetime_milestone');
+    });
+
+    test('src/student/home.js містить підпис загалом здобутих зірок', () => {
+      const homePath = path.resolve(__dirname, '../src/student/home.js');
+      const homeSource = fs.readFileSync(homePath, 'utf8');
+
+      assert.ok(
+        homeSource.includes('Загалом здобуто за весь час: ${p.earned} ✦'),
+        'home.js повинен містити підпис "Загалом здобуто за весь час: ${p.earned} ✦"'
+      );
     });
   });
 });

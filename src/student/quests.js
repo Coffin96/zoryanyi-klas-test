@@ -54,14 +54,18 @@ export function renderQuests(root, state) {
       <!-- Список завдань у стилі Книги Шукача Пригод -->
       <div class="flex flex-col gap-sm">
         ${quests.map(quest => {
-          const isWeekly = quest.period === 'week' || quest.period === 'weekly' || quest.perWeek != null;
-          const counters = isWeekly ? weekCounters : monthCounters;
-          const currentStars = isWeekly ? weekStars : monthStars;
-          const currentCap = isWeekly ? weeklyCap : monthlyCap;
-          const limit = isWeekly ? (quest.perWeek ?? quest.limit ?? quest.perMonth ?? 1) : (quest.perMonth ?? quest.limit ?? 1);
-          const count = counters[quest.id] || 0;
+          const isLifetime = quest.type === 'lifetime_milestone' || quest.period === 'lifetime';
+          const isWeekly = !isLifetime && (quest.period === 'week' || quest.period === 'weekly' || quest.perWeek != null);
+          const counters = isLifetime ? (p.counters?.lifetime || {}) : (isWeekly ? weekCounters : monthCounters);
+          const currentStars = isLifetime ? 0 : (isWeekly ? weekStars : monthStars);
+          const currentCap = isLifetime ? Infinity : (isWeekly ? weeklyCap : monthlyCap);
+          const limit = isLifetime ? 1 : (isWeekly ? (quest.perWeek ?? quest.limit ?? quest.perMonth ?? 1) : (quest.perMonth ?? quest.limit ?? 1));
+          const count = Math.max(counters[quest.id] || 0, p.stats?.quests?.[quest.id] || 0);
           const isDone = count >= limit || currentStars >= currentCap;
-          const percent = Math.min(100, Math.floor((count / limit) * 100));
+
+          const target = quest.target ?? quest.params?.target ?? limit;
+          const progress = isLifetime ? (p.earned || 0) : count;
+          const percent = isDone ? 100 : (target > 0 ? Math.min(100, Math.floor((progress / target) * 100)) : 0);
 
           let desc = quest.desc || quest.description;
           if (!desc) {
@@ -72,6 +76,7 @@ export function renderQuests(root, state) {
             else if (quest.type === 'monthly_average') desc = 'Середній бал понад 10 протягом місяця';
             else if (quest.type === 'growth') desc = 'Отримай оцінку, вищу за середній бал твоїх робіт';
             else if (quest.type === 'streak') desc = '3 оцінки від 8 балів протягом 7 днів';
+            else if (quest.type === 'lifetime_milestone') desc = `Назбирай ${quest.target ?? 100} зірочок за весь час`;
             else if (quest.type === 'manual') desc = 'Корисна допомога класу або спільній справі';
             else desc = 'Спеціальне завдання';
           }
@@ -83,7 +88,7 @@ export function renderQuests(root, state) {
           else if (quest.type === 'manual') iconHtml = iconContrib(26);
           else iconHtml = `<span style="font-size: 24px;">${quest.icon || '🏆'}</span>`;
 
-          const periodText = isWeekly ? 'цього тижня' : 'цього місяця';
+          const periodText = isLifetime ? 'за весь час' : (isWeekly ? 'цього тижня' : 'цього місяця');
 
           return `
             <div class="parchment-card" style="padding: 14px 16px;">
@@ -112,8 +117,8 @@ export function renderQuests(root, state) {
               <!-- Прогрес виконання -->
               <div style="margin-top: 10px;">
                 <div class="flex justify-between" style="font-size: 11px; margin-bottom: 4px; color: var(--text-parchment-subtle);">
-                  <span>${isDone ? (count >= limit ? 'Ліміт виконано ✓' : 'Ліміт зірок вичерпано') : `Прогрес ${periodText}:`}</span>
-                  <span style="font-weight: 700; color: var(--text-parchment);">${count} / ${limit}</span>
+                  <span>${isDone ? (count >= limit ? 'Виконано ✓' : 'Ліміт зірок вичерпано') : `Прогрес ${periodText}:`}</span>
+                  <span style="font-weight: 700; color: var(--text-parchment);">${isLifetime ? `${Math.min(progress, target)} / ${target}` : `${count} / ${limit}`}</span>
                 </div>
                 <div class="genshin-progress-track">
                   <div class="${isDone ? 'genshin-progress-fill-cyan' : 'genshin-progress-fill-gold'}" style="width: ${percent}%;"></div>

@@ -1,4 +1,4 @@
-import { runTransaction, doc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { runTransaction as firestoreRunTransaction, doc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { db } from "./firebase.js";
 import { creditGrades } from "../engine/economy.js";
 import { redeem as engineRedeem } from "../engine/redeem.js";
@@ -7,7 +7,7 @@ import { awardManual as engineAwardManual } from "../engine/quests.js";
 
 // Helper to run a generic profile update transaction
 async function runOp(uuid, opId, cfg, opFn) {
-  return runTransaction(db, async (tx) => {
+  return firestoreRunTransaction(db, async (tx) => {
     const pRef = doc(db, "profiles", uuid);
     const pSnap = await tx.get(pRef);
     if (!pSnap.exists()) throw new Error("profile-not-found");
@@ -163,3 +163,28 @@ export async function adjust(uuid, opId, cfg, amount, reasonCode) {
     return { ...res, type: 'adjust' };
   });
 }
+
+export async function runTransaction(uuid, type, amount, reason) {
+  const opId = crypto.randomUUID();
+  const cfg = (typeof window !== 'undefined' && window.zklas?.config) || {};
+  const numAmount = Number(amount) || 0;
+  const delta = (type === 'add' || type === 'credit') ? Math.abs(numAmount) : -Math.abs(numAmount);
+
+  return runOp(uuid, opId, cfg, (p) => {
+    if (delta < 0 && p.balance + delta < 0) {
+      return { ok: false, reason: 'insufficient-funds' };
+    }
+    const prev = structuredClone(p);
+    const next = structuredClone(p);
+    next.balance += delta;
+    if (delta > 0) {
+      next.earned = (next.earned || 0) + delta;
+    }
+    return { ok: true, prev, profile: next, delta, type: 'adjust', reason };
+  });
+}
+
+if (typeof window !== 'undefined') {
+  window.runTransaction = runTransaction;
+}
+

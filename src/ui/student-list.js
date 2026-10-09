@@ -11,11 +11,6 @@ export async function renderStudentList(root) {
     <div class="container">
       <div class="top-bar flex justify-between items-center">
         <h2 class="fantasy-title" style="margin:0; font-size: 20px;">Учні класу</h2>
-        <div class="flex gap-sm">
-          <button id="btn-quick-scan" class="btn-genshin-gold" style="padding: 6px 14px; font-size: 13px; min-height: 36px; border-radius: 12px;">
-            📷 Сканер
-          </button>
-        </div>
       </div>
 
       <!-- Швидке створення учня -->
@@ -57,7 +52,6 @@ export async function renderStudentList(root) {
   `;
 
   // Швидка навігація
-  document.getElementById('btn-quick-scan').addEventListener('click', () => navigate('scanner'));
   document.getElementById('btn-batch-add').addEventListener('click', () => navigate('admin'));
   document.getElementById('btn-print-cards-nav').addEventListener('click', () => navigate('admin'));
 

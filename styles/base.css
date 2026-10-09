@@ -560,3 +560,265 @@ body::before {
   font-size: 11px;
   white-space: nowrap;
 }
+
+/* 10. Admin Panel - Shop Item Management */
+.admin-shop-item {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 14px;
+  transition: opacity 0.2s ease;
+}
+
+.shop-item-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.shop-item-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  flex: 1;
+}
+
+.shop-item-icon {
+  font-size: 26px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.shop-item-text {
+  min-width: 0;
+}
+
+.shop-item-title {
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--text-parchment);
+  line-height: 1.25;
+}
+
+.shop-item-meta {
+  font-size: 11px;
+  margin-top: 2px;
+  color: var(--text-parchment-muted);
+}
+
+.shop-item-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 8px;
+  border-top: 1px dashed rgba(181, 141, 60, 0.25);
+}
+
+.shop-controls-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.shop-price-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.shop-price-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-parchment-muted);
+}
+
+.shop-price-input {
+  width: 58px !important;
+  min-height: 36px !important;
+  padding: 4px !important;
+  text-align: center;
+  font-weight: bold;
+  font-size: 15px;
+  background: #fff;
+  color: #222;
+  border: 1.5px solid var(--gold-deep);
+  border-radius: var(--radius-sm);
+  outline: none;
+}
+
+.shop-price-input:focus {
+  border-color: var(--gold-primary);
+  box-shadow: 0 0 6px var(--gold-glow);
+}
+
+.shop-price-currency {
+  color: var(--gold-deep);
+  font-weight: bold;
+  font-size: 15px;
+  font-family: var(--font-fantasy);
+}
+
+.shop-actions-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-toggle-active {
+  padding: 6px 12px;
+  min-height: 36px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.btn-toggle-active.is-active {
+  background: rgba(61, 220, 151, 0.2);
+  color: #137a4a;
+}
+
+.btn-toggle-active.is-hidden {
+  background: rgba(0, 0, 0, 0.08);
+  color: var(--text-parchment-muted);
+}
+
+.btn-toggle-active:hover {
+  filter: brightness(0.95);
+}
+
+.admin-shop-item .btn-delete-item {
+  padding: 6px 10px;
+  min-height: 36px;
+  min-width: 36px;
+  font-size: 13px;
+  border-radius: var(--radius-sm);
+}
+
+.shop-stock-row {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.shop-stock-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(0, 0, 0, 0.05);
+  padding: 5px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(0, 0, 0, 0.09);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.shop-stock-toggle-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-parchment);
+  user-select: none;
+}
+
+.shop-stock-toggle-label input[type="checkbox"] {
+  width: 18px !important;
+  height: 18px !important;
+  min-height: 18px !important;
+  margin: 0;
+  cursor: pointer;
+  accent-color: var(--gold-deep);
+}
+
+.shop-stock-input-wrap {
+  align-items: center;
+  gap: 4px;
+}
+
+.shop-stock-input {
+  width: 56px !important;
+  min-height: 32px !important;
+  padding: 2px 4px !important;
+  text-align: center;
+  font-weight: bold;
+  font-size: 13px;
+  background: #fff;
+  color: #222;
+  border: 1px solid var(--gold-deep);
+  border-radius: var(--radius-sm);
+  outline: none;
+}
+
+.shop-stock-input:focus {
+  border-color: var(--gold-primary);
+  box-shadow: 0 0 6px var(--gold-glow);
+}
+
+.shop-stock-unit {
+  font-size: 11px;
+  color: var(--text-parchment-muted);
+}
+
+/* ==========================================================================
+   11. Animations & Tactile Feedback (Етап 7)
+   ========================================================================== */
+
+/* Tactile button & card squeezing effect on click (:active) */
+.btn-genshin-gold,
+.btn-genshin-crimson,
+.nav-btn,
+.genshin-nav-btn,
+.btn-wishlist,
+.btn-toggle-active,
+.grade-btn,
+.btn-delete-item,
+.clickable-card,
+#nearest-quest-card {
+  transition: transform 0.1s ease, filter 0.1s ease, box-shadow 0.1s ease;
+}
+
+.btn-genshin-gold:active,
+.btn-genshin-crimson:active,
+.nav-btn:active,
+.genshin-nav-btn:active,
+.btn-wishlist:active,
+.btn-toggle-active:active,
+.grade-btn:active,
+.btn-delete-item:active,
+.clickable-card:active,
+#nearest-quest-card:active {
+  transform: scale(0.95);
+  filter: brightness(0.9);
+}
+
+/* Central star collection pulse animation */
+@keyframes starPulseAnim {
+  0% {
+    transform: scale(1) rotate(0deg);
+  }
+  40% {
+    transform: scale(1.18) rotate(12deg);
+    filter: drop-shadow(0 0 20px rgba(255, 230, 130, 0.95)) brightness(1.25);
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+.star-pulse-anim {
+  display: inline-flex;
+  transform-origin: center;
+  animation: starPulseAnim 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
