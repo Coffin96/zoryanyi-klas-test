@@ -52,10 +52,7 @@ export async function renderAdmin(root) {
                 <input type="number" id="reward-price" placeholder="Ціна" min="1" max="999" required style="width: 65px; min-height: 44px; text-align: center; font-weight: bold; font-size: 16px;" value="10">
                 <span style="font-weight: bold; color: var(--star); font-size: 16px;">✦</span>
               </div>
-              <select id="reward-cat" style="flex: 1; min-width: 110px; padding: 8px 10px; border-radius: var(--radius-md); background: rgba(21, 29, 56, 0.9); color: var(--text); border: 1px solid var(--gold-border); min-height: 44px; font-size: 14px;">
-                <option value="sweet">Смаколик</option>
-                <option value="privilege">Привілей</option>
-              </select>
+              <input type="text" id="new-item-category" placeholder="Тип (опціонально)" style="flex: 1; min-width: 110px; padding: 12px; border-radius: var(--radius-md); background: rgba(21, 29, 56, 0.9); color: var(--text); border: 1px solid var(--gold-border); min-height: 44px; font-size: 14px;">
               <button type="submit" class="btn-genshin-gold" style="flex: 1; min-width: 90px; min-height: 44px; padding: 8px 16px; white-space: nowrap; font-weight: bold; border-radius: 12px;">Додати</button>
             </div>
             <div class="flex gap-md items-center" style="flex-wrap: wrap; margin-top: 4px;">
@@ -163,7 +160,7 @@ export async function renderAdmin(root) {
               <div class="shop-item-text">
                 <div class="shop-item-title">${item.name}</div>
                 <div class="shop-item-meta">
-                  ${item.category === 'sweet' ? 'Смаколик' : 'Привілей'} · ${isActive ? '<span style="color:#217346; font-weight: 700;">Активний</span>' : '<span style="color:#8b2626;">Приховано</span>'}
+                  ${item.category ? `<span class="badge-tag">${item.category}</span> · ` : ''}${isActive ? '<span style="color:#217346; font-weight: 700;">Активний</span>' : '<span style="color:#8b2626;">Приховано</span>'}
                   ${hasStock ? ` · <span style="font-weight: 700; color: ${item.stock === 0 ? '#b71c1c' : '#217346'};">Залишок: ${item.stock} шт.</span>` : ''}
                 </div>
               </div>
@@ -286,7 +283,8 @@ export async function renderAdmin(root) {
     const icon = document.getElementById('reward-icon').value.trim() || '🎁';
     const name = document.getElementById('reward-name').value.trim();
     const price = Number(document.getElementById('reward-price').value) || 10;
-    const category = document.getElementById('reward-cat').value;
+    const catInput = document.getElementById('new-item-category') || document.getElementById('reward-cat');
+    const category = catInput?.value.trim() || '';
     const hasStock = document.getElementById('reward-has-stock')?.checked;
     const stockVal = hasStock ? Math.max(0, parseInt(document.getElementById('reward-stock').value, 10) || 0) : null;
 
@@ -308,6 +306,9 @@ export async function renderAdmin(root) {
     shopItems.push(newItem);
 
     document.getElementById('reward-name').value = '';
+    if (catInput) {
+      catInput.value = '';
+    }
     if (chkNewStock) {
       chkNewStock.checked = false;
       wrapNewStock.style.display = 'none';

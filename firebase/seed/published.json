@@ -20,11 +20,11 @@
     "active": false
   },
   "shop": [
-    { "id": "caramel", "name": "Карамель", "icon": "🍬", "category": "sweet", "price": 7, "active": true, "order": 1, "unitCost": 2.25 },
-    { "id": "jelly", "name": "Желейка", "icon": "🍮", "category": "sweet", "price": 12, "active": true, "order": 2, "unitCost": 3.96 },
-    { "id": "tartlet", "name": "Тарталетка", "icon": "🥧", "category": "sweet", "price": 17, "active": true, "order": 3, "stock": 3, "unitCost": 15.0, "acceptSubsidy": true },
-    { "id": "priv_music", "name": "Музика на перерві", "icon": "🎵", "category": "privilege", "price": 6, "active": true, "order": 4, "unitCost": 0 },
-    { "id": "priv_pc", "name": "10 хв творчого часу за комп'ютером", "icon": "💻", "category": "privilege", "price": 8, "active": true, "order": 5, "unitCost": 0 }
+    { "id": "caramel", "name": "Карамель", "icon": "🍬", "category": "Смаколик", "price": 7, "active": true, "order": 1, "unitCost": 2.25 },
+    { "id": "jelly", "name": "Желейка", "icon": "🍮", "category": "Смаколик", "price": 12, "active": true, "order": 2, "unitCost": 3.96 },
+    { "id": "tartlet", "name": "Тарталетка", "icon": "🥧", "category": "Смаколик", "price": 17, "active": true, "order": 3, "stock": 3, "unitCost": 15.0, "acceptSubsidy": true },
+    { "id": "priv_music", "name": "Музика на перерві", "icon": "🎵", "category": "Привілей", "price": 6, "active": true, "order": 4, "unitCost": 0 },
+    { "id": "priv_pc", "name": "10 хв творчого часу за комп'ютером", "icon": "💻", "category": "Привілей", "price": 8, "active": true, "order": 5, "unitCost": 0 }
   ],
   "quests": [
     { "id": "knowledge_gatherer", "type": "weekly_count", "title": "Збирач знань", "icon": "📚", "period": "weekly", "active": true, "reward": 3, "perWeek": 1, "params": { "count": 4 }, "desc": "Отримай 4 будь-які оцінки протягом тижня" },

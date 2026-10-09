@@ -58,7 +58,6 @@ export function renderShop(root, state) {
           const isSoldOut = hasStock && item.stock <= 0;
           const percent = Math.min(100, Math.floor((p.balance / item.price) * 100));
           const canAfford = p.balance >= item.price && !isSoldOut;
-          const isSweet = item.category === 'sweet';
           const inWishlist = wishlist.some(id => String(id) === String(item.id));
           
           return `
@@ -72,7 +71,7 @@ export function renderShop(root, state) {
                   <div>
                     <div style="font-weight: 700; font-size: 15px; color: var(--text-parchment);">${item.name}</div>
                     <div class="flex items-center gap-xs" style="margin-top: 2px;">
-                      <span class="badge-tag">${isSweet ? 'Смаколик' : 'Привілей'}</span>
+                      ${item.category ? `<span class="badge-tag">${item.category}</span>` : ''}
                       ${hasStock ? `
                         <span class="badge-tag" style="background: ${isSoldOut ? 'rgba(183, 28, 28, 0.12)' : 'rgba(33, 115, 70, 0.12)'}; color: ${isSoldOut ? '#b71c1c' : '#217346'}; border: 1px solid ${isSoldOut ? 'rgba(183, 28, 28, 0.3)' : 'rgba(33, 115, 70, 0.3)'}; font-weight: 700;">
                           Залишилось: ${item.stock} шт.
